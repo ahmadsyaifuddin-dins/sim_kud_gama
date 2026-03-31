@@ -9,87 +9,85 @@
             font-size: 11px;
         }
 
-        table {
+        .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-bottom: 20px;
         }
 
-        th,
-        td {
+        .data-table th,
+        .data-table td {
             border: 1px solid #000;
-            padding: 6px;
+            padding: 5px;
             text-align: left;
+            vertical-align: top;
         }
 
-        th {
-            background-color: #f2f2f2;
+        .data-table th {
+            background-color: #fff2cc;
             text-align: center;
-        }
-
-        .text-right {
-            text-align: right;
+            font-weight: bold;
         }
 
         .text-center {
             text-align: center;
         }
 
-        .total-row {
-            background-color: #ffffcc;
-            font-weight: bold;
+        .text-right {
+            text-align: right;
         }
     </style>
 </head>
 
 <body>
-
     @include('reports._header', [
-        'title' => 'LAPORAN KEUANGAN & PEMBAYARAN',
+        'title' => 'Laporan Pemasukan Pendaftaran',
         'subtitle' =>
             'Periode: ' .
-            \Carbon\Carbon::parse($request->start_date)->translatedFormat('d F Y') .
-            ' s/d ' .
-            \Carbon\Carbon::parse($request->end_date)->translatedFormat('d F Y'),
+            ($request->start_date
+                ? \Carbon\Carbon::parse($request->start_date)->translatedFormat('d M Y') .
+                    ' s/d ' .
+                    \Carbon\Carbon::parse($request->end_date)->translatedFormat('d M Y')
+                : 'Semua Data'),
     ])
 
-    <table>
+    <table class="data-table">
         <thead>
             <tr>
                 <th width="5%">No</th>
-                <th width="15%">Tanggal Bayar</th>
-                <th width="20%">No. Anggota</th>
+                <th width="20%">Tanggal Bayar</th>
                 <th width="30%">Nama Anggota</th>
-                <th width="15%">Metode</th>
-                <th width="15%">Jumlah</th>
+                <th width="25%">No Anggota</th>
+                <th width="20%">Nominal Bayar (Rp)</th>
             </tr>
         </thead>
         <tbody>
             @forelse($members as $index => $m)
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
-                    <td class="text-center">{{ $m->tanggal_bayar->translatedFormat('d/m/Y') }}</td>
-                    <td>{{ $m->nomor_anggota }}</td>
+                    <td class="text-center">{{ \Carbon\Carbon::parse($m->tanggal_bayar)->translatedFormat('d M Y') }}
+                    </td>
                     <td>{{ $m->nama_lengkap }}</td>
-                    <td class="text-center">Tunai/TF</td>
-                    <td class="text-right">Rp {{ number_format($m->biaya_pendaftaran, 0, ',', '.') }}</td>
+                    <td class="text-center">{{ $m->nomor_anggota }}</td>
+                    <td class="text-right">{{ number_format($m->biaya_pendaftaran, 0, ',', '.') }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center">Tidak ada data pembayaran.</td>
+                    <td colspan="5" class="text-center">Tidak ada transaksi pemasukan pada periode ini.</td>
                 </tr>
             @endforelse
         </tbody>
         <tfoot>
-            <tr class="total-row">
-                <td colspan="5" class="text-right">TOTAL PEMASUKAN</td>
-                <td class="text-right">Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</td>
+            <tr>
+                <td colspan="4" class="text-right" style="font-weight: bold; padding: 8px;">Total Pemasukan:</td>
+                <td class="text-right" style="font-weight: bold; background-color: #f2f2f2; padding: 8px;">
+                    Rp {{ number_format($totalPemasukan, 0, ',', '.') }}
+                </td>
             </tr>
         </tfoot>
     </table>
 
     @include('reports._signature', ['role' => 'Bendahara KUD'])
-
 </body>
 
 </html>

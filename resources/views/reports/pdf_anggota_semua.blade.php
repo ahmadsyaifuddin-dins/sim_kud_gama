@@ -12,6 +12,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 20px;
         }
 
         th,
@@ -31,21 +32,10 @@
         .text-center {
             text-align: center;
         }
-
-        .badge-success {
-            color: green;
-            font-weight: bold;
-        }
-
-        .badge-warning {
-            color: orange;
-            font-weight: bold;
-        }
     </style>
 </head>
 
 <body>
-
     @include('reports._header')
 
     <table>
@@ -55,10 +45,9 @@
                 <th width="15%">No Anggota</th>
                 <th width="15%">NIK</th>
                 <th width="20%">Nama Lengkap</th>
-                <th width="15%">Dusun</th>
-                <th width="10%">Lahan</th>
-                <th width="10%">Gabung</th>
-                <th width="10%">Cetak</th>
+                <th width="20%">Alamat / Dusun</th>
+                <th width="10%">L. Lahan</th>
+                <th width="15%">Tgl Gabung</th>
             </tr>
         </thead>
         <tbody>
@@ -68,23 +57,20 @@
                     <td class="text-center">{{ $m->nomor_anggota }}</td>
                     <td>{{ $m->nik }}</td>
                     <td>{{ $m->nama_lengkap }}</td>
-                    <td>{{ $m->dusun }}</td>
+                    <td>{{ $m->dusun ?? '-' }}, {{ $m->desa }}</td>
                     <td class="text-center">{{ $m->luasan_lahan }} Ha</td>
-                    <td class="text-center">{{ $m->tanggal_bergabung->translatedFormat('d/m/Y') }}</td>
                     <td class="text-center">
-                        {{ $m->status_cetak ? 'Sudah' : 'Belum' }}
-                    </td>
+                        {{ \Carbon\Carbon::parse($m->tanggal_bergabung)->translatedFormat('d/m/Y') }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8" class="text-center">Tidak ada data.</td>
+                    <td colspan="7" class="text-center">Tidak ada data anggota.</td>
                 </tr>
             @endforelse
         </tbody>
     </table>
 
     @include('reports._signature', ['role' => 'Ketua KUD'])
-
 </body>
 
 </html>

@@ -1,34 +1,22 @@
-<style>
-    .signature-wrapper {
-        margin-top: 30px;
-        width: 100%;
-        text-align: right;
-        /* Hati-hati dengan page-break di PDF */
-        page-break-inside: avoid;
-    }
+<table style="width: 100%; margin-top: 40px; page-break-inside: avoid; border: none;">
+    <tr>
+        <td style="width: 65%; border: none;"></td>
 
-    .signature-box {
-        display: inline-block;
-        width: 200px;
-        text-align: center;
-    }
+        <td style="width: 35%; text-align: center; font-size: 11px; border: none;">
+            <p style="margin: 0; margin-bottom: 5px;">
+                Kotabaru, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
+            </p>
+            <p style="margin: 0;">Mengetahui,</p>
+            <p style="margin: 0; font-weight: bold;">
+                {{ $role ?? 'Ketua KUD' }}
+            </p>
 
-    .signature-space {
-        height: 60px;
-        /* Ruang untuk tanda tangan basah */
-    }
-</style>
+            <br><br><br><br>
 
-<div class="signature-wrapper">
-    <div class="signature-box">
-        <p>Kotabaru, {{ now()->translatedFormat('d F Y') }}</p>
-
-        <p>{{ $role ?? 'Mengetahui,' }}</p>
-
-        <div class="signature-space"></div>
-
-        <p style="font-weight: bold; text-decoration: underline;">
-            ( ........................................ )
-        </p>
-    </div>
-</div>
+            <p style="margin: 0; font-weight: bold; text-decoration: underline;">
+                Ketua KUD Gajah Mada
+            </p>
+            <p style="margin: 0;">NIP. 1234567890</p>
+        </td>
+    </tr>
+</table>
