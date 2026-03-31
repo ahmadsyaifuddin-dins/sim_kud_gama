@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\AngsuranController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\ManagementController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\PinjamanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SavingController;
@@ -37,6 +39,9 @@ Route::middleware('auth')->group(function () {
     Route::put('/members/{member}/approve', [MemberController::class, 'approve'])->name('members.approve');
     Route::get('members/{member}/print-card', [MemberController::class, 'printCard'])->name('members.print_card');
     Route::get('members/{member}/print-receipt', [MemberController::class, 'printReceipt'])->name('members.print_receipt');
+
+    Route::resource('pinjaman', PinjamanController::class);
+    Route::resource('angsuran', AngsuranController::class);
 
     // MODULE 3: IURAN / SIMPANAN
     Route::resource('savings', SavingController::class);
