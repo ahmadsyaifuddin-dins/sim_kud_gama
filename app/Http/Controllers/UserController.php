@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
 
 class UserController extends Controller
 {
@@ -21,18 +21,16 @@ class UserController extends Controller
         return view('users.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+        // Validasi sudah di-handle oleh StoreUserRequest
+        $validated = $request->validated();
 
         User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role' => $validated['role'], // Menyimpan role ke DB
+            'password' => Hash::make($validated['password']),
         ]);
 
         return redirect()->route('users.index')->with('success', 'User berhasil ditambahkan.');
@@ -43,22 +41,20 @@ class UserController extends Controller
         return view('users.edit', compact('user'));
     }
 
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$user->id],
-            'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
-        ]);
+        // Validasi sudah di-handle oleh UpdateUserRequest
+        $validated = $request->validated();
 
         $data = [
-            'name' => $request->name,
-            'email' => $request->email,
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role' => $validated['role'], // Mengupdate role
         ];
 
         // Hanya update password jika input tidak kosong
         if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
+            $data['password'] = Hash::make($validated['password']);
         }
 
         $user->update($data);
