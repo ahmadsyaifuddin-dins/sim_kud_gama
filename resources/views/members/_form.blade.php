@@ -1,8 +1,10 @@
 <div class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
 
+    {{-- Alert Error Box --}}
     @if ($errors->any())
-        <div class="sm:col-span-2 p-4 mb-2 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
-            <p class="font-bold mb-1">Terjadi kesalahan input:</p>
+        <div class="sm:col-span-2 p-4 mb-2 text-sm text-red-700 bg-red-100 rounded-lg border border-red-200"
+            role="alert">
+            <p class="font-bold mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Terjadi kesalahan input:</p>
             <ul class="list-disc list-inside">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -11,26 +13,21 @@
         </div>
     @endif
 
-    {{-- Hanya tampilkan jika sedang mengedit data member yang sudah ada --}}
+    {{-- Status Keanggotaan (Hanya muncul saat Edit) --}}
     @if (isset($member) && $member->exists)
-        <div class="sm:col-span-2 bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+        <div class="sm:col-span-2 bg-yellow-50 p-5 rounded-lg border border-yellow-200 shadow-sm">
             <label class="block text-sm font-bold text-gray-800 mb-2">Status Keanggotaan</label>
             <select name="status"
-                class="block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-purple-400 focus:outline-none focus:shadow-outline-purple font-semibold
-                {{ $member->status == 'active' ? 'text-green-700' : ($member->status == 'stopped' ? 'text-red-700' : 'text-gray-700') }}">
-
-                <option value="active" {{ old('status', $member->status) == 'active' ? 'selected' : '' }}>
-                    AKTIF - Anggota Resmi
-                </option>
-                <option value="inactive" {{ old('status', $member->status) == 'inactive' ? 'selected' : '' }}>
-                    PASIF / NON-AKTIF (Cuti sementara)
-                </option>
-                <option value="stopped" {{ old('status', $member->status) == 'stopped' ? 'selected' : '' }}>
-                    BERHENTI / KELUAR (Mengundurkan diri/Meninggal)
-                </option>
-                <option value="pending" {{ old('status', $member->status) == 'pending' ? 'selected' : '' }}>
-                    PENDING (Menunggu Verifikasi)
-                </option>
+                class="block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-purple-400 focus:ring focus:ring-purple-200 font-bold
+                {{ $member->status == 'active' ? 'text-green-700 bg-green-50' : ($member->status == 'stopped' ? 'text-red-700 bg-red-50' : 'text-gray-700') }}">
+                <option value="active" {{ old('status', $member->status) == 'active' ? 'selected' : '' }}>AKTIF -
+                    Anggota Resmi</option>
+                <option value="inactive" {{ old('status', $member->status) == 'inactive' ? 'selected' : '' }}>PASIF /
+                    NON-AKTIF (Cuti sementara)</option>
+                <option value="stopped" {{ old('status', $member->status) == 'stopped' ? 'selected' : '' }}>BERHENTI /
+                    KELUAR (Mengundurkan diri/Meninggal)</option>
+                <option value="pending" {{ old('status', $member->status) == 'pending' ? 'selected' : '' }}>PENDING
+                    (Menunggu Verifikasi)</option>
             </select>
             <p class="text-xs text-gray-500 mt-2">
                 *Ubah status ke <b>"Berhenti"</b> jika anggota resmi mengundurkan diri atau dikeluarkan.
@@ -38,212 +35,184 @@
         </div>
     @endif
 
+    {{-- Blok Data Pribadi --}}
     <div>
-        <label class="block text-sm text-gray-700">Nomor Anggota</label>
-        <input type="text" name="nomor_anggota" value="{{ old('nomor_anggota', $member->nomor_anggota ?? '') }}"
-            class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:border-purple-400 focus:outline-none focus:shadow-outline-purple"
-            placeholder="Contoh: KUD-GM-0001" required>
-        @error('nomor_anggota')
-            <span class="text-xs text-red-600">{{ $message }}</span>
-        @enderror
+        <x-forms.label value="Nomor Anggota" required="true" />
+        <x-forms.input type="text" name="nomor_anggota"
+            value="{{ old('nomor_anggota', $member->nomor_anggota ?? '') }}" placeholder="Contoh: KUD-GM-0001"
+            required />
     </div>
 
     <div>
-        {{-- PERBAIKAN DISINI: Pakai null coalescing operator (??) --}}
         <x-forms.numeric-input name="nik" label="NIK (Nomor KTP)" mode="nik" required="true"
             placeholder="16 Digit Angka" :value="$member->nik ?? ''" />
     </div>
 
     <div class="sm:col-span-2">
-        <label class="block text-sm text-gray-700">Nama Lengkap</label>
-        <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap', $member->nama_lengkap ?? '') }}"
-            class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:border-purple-400 focus:outline-none focus:shadow-outline-purple"
-            required>
+        <x-forms.label value="Nama Lengkap" required="true" />
+        <x-forms.input type="text" name="nama_lengkap" value="{{ old('nama_lengkap', $member->nama_lengkap ?? '') }}"
+            required />
     </div>
 
     <div>
-        <label class="block text-sm text-gray-700">Tempat Lahir</label>
-        <input type="text" name="tempat_lahir" value="{{ old('tempat_lahir', $member->tempat_lahir ?? '') }}"
-            class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:border-purple-400 focus:outline-none focus:shadow-outline-purple"
-            required>
+        <x-forms.label value="Tempat Lahir" required="true" />
+        <x-forms.input type="text" name="tempat_lahir" value="{{ old('tempat_lahir', $member->tempat_lahir ?? '') }}"
+            required />
     </div>
 
     <div>
-        <label class="block text-sm text-gray-700">Tanggal Lahir</label>
-        <input type="date" name="tanggal_lahir"
+        <x-forms.label value="Tanggal Lahir" required="true" />
+        <x-forms.input type="date" name="tanggal_lahir"
             value="{{ old('tanggal_lahir', isset($member) && $member->tanggal_lahir ? $member->tanggal_lahir->format('Y-m-d') : '') }}"
-            class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:border-purple-400 focus:outline-none focus:shadow-outline-purple"
-            required>
+            required />
     </div>
 
     <div>
-        <label class="block text-sm text-gray-700">Jenis Kelamin</label>
-        <select name="jenis_kelamin"
-            class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:border-purple-400 focus:outline-none focus:shadow-outline-purple">
+        <x-forms.label value="Jenis Kelamin" required="true" />
+        <x-forms.dropdown name="jenis_kelamin" required>
             <option value="L" {{ old('jenis_kelamin', $member->jenis_kelamin ?? '') == 'L' ? 'selected' : '' }}>
                 Laki-laki</option>
             <option value="P" {{ old('jenis_kelamin', $member->jenis_kelamin ?? '') == 'P' ? 'selected' : '' }}>
                 Perempuan</option>
-        </select>
+        </x-forms.dropdown>
     </div>
 
     <div>
-        <label class="block text-sm text-gray-700">Pekerjaan</label>
-        <input type="text" name="pekerjaan" value="{{ old('pekerjaan', $member->pekerjaan ?? '') }}"
-            class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:border-purple-400 focus:outline-none focus:shadow-outline-purple">
+        <x-forms.label value="Pekerjaan" />
+        <x-forms.input type="text" name="pekerjaan" value="{{ old('pekerjaan', $member->pekerjaan ?? '') }}" />
     </div>
 
     <div>
-        <label class="block text-sm text-gray-700">Luasan Lahan Sawit (Hektar)</label>
+        <x-forms.label value="Luasan Lahan Sawit (Hektar)" required="true" />
         <div class="relative mt-1">
             <input type="number" step="0.01" name="luasan_lahan"
                 value="{{ old('luasan_lahan', $member->luasan_lahan ?? '') }}"
-                class="block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-purple-400 focus:outline-none focus:shadow-outline-purple pr-10"
+                class="block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-purple-400 focus:ring focus:ring-purple-200 pr-10"
                 placeholder="Contoh: 2.5" required>
             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <span class="text-gray-500 sm:text-sm">Ha</span>
+                <span class="text-gray-500 sm:text-sm font-bold">Ha</span>
             </div>
         </div>
-        @error('luasan_lahan')
-            <span class="text-xs text-red-600">{{ $message }}</span>
-        @enderror
-    </div>
-
-    <div class="sm:col-span-2">
-        <label class="block text-sm text-gray-700">Alamat Lengkap (Jalan/RT/RW)</label>
-        <textarea name="alamat_lengkap"
-            class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:border-purple-400 focus:outline-none focus:shadow-outline-purple"
-            rows="3">{{ old('alamat_lengkap', $member->alamat_lengkap ?? '') }}</textarea>
     </div>
 
     <div>
-        <label class="block text-sm text-gray-700">Dusun</label>
-        <input type="text" name="dusun" value="{{ old('dusun', $member->dusun ?? '') }}"
-            class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:border-purple-400 focus:outline-none focus:shadow-outline-purple"
-            placeholder="Nama Dusun" required>
-    </div>
-
-    <div>
-        <label class="block text-sm text-gray-700">Desa</label>
-        <input type="text" name="desa" value="Telaga Sari" readonly
-            class="block w-full mt-1 text-sm bg-gray-100 border-gray-300 rounded-md shadow-sm cursor-not-allowed">
-    </div>
-
-    <div>
-        {{-- PERBAIKAN DISINI: Pakai null coalescing operator (??) --}}
         <x-forms.numeric-input name="no_hp" label="No HP / WA" mode="no_hp" required="true"
-            placeholder="10 Digit Angka" :value="$member->no_hp ?? ''" />
-    </div>
-
-    <div>
-        <label class="block text-sm text-gray-700">Tanggal Bergabung</label>
-        <input type="date" name="tanggal_bergabung"
-            value="{{ old('tanggal_bergabung', isset($member) && $member->tanggal_bergabung ? $member->tanggal_bergabung->format('Y-m-d') : date('Y-m-d')) }}"
-            class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:border-purple-400 focus:outline-none focus:shadow-outline-purple">
+            placeholder="10-15 Digit Angka" :value="$member->no_hp ?? ''" />
     </div>
 
     <div class="sm:col-span-2">
-        <label class="block text-sm text-gray-700">Pas Foto (Format: JPG/PNG, Max 2MB)</label>
+        <x-forms.label value="Alamat Lengkap (Jalan/RT/RW)" required="true" />
+        <textarea name="alamat_lengkap" rows="3" required
+            class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:border-purple-400 focus:ring focus:ring-purple-200">{{ old('alamat_lengkap', $member->alamat_lengkap ?? '') }}</textarea>
+    </div>
 
+    <div>
+        <x-forms.label value="Dusun" required="true" />
+        <x-forms.input type="text" name="dusun" value="{{ old('dusun', $member->dusun ?? '') }}"
+            placeholder="Nama Dusun" required />
+    </div>
+
+    <div>
+        <x-forms.label value="Desa" required="true" />
+        <input type="text" name="desa" value="Telaga Sari" readonly
+            class="block w-full mt-1 text-sm bg-gray-100 border-gray-300 rounded-md shadow-sm cursor-not-allowed text-gray-500 font-semibold">
+    </div>
+
+    <div>
+        <x-forms.label value="Tanggal Bergabung" required="true" />
+        <x-forms.input type="date" name="tanggal_bergabung"
+            value="{{ old('tanggal_bergabung', isset($member) && $member->tanggal_bergabung ? $member->tanggal_bergabung->format('Y-m-d') : date('Y-m-d')) }}"
+            required />
+    </div>
+
+    <div>
+        <x-forms.label value="Pas Foto (JPG/PNG, Max 2MB)" />
+        <x-forms.upload-file name="foto" accept="image/*" />
         @if (isset($member) && $member->foto)
-            <div class="mb-2">
-                <img src="{{ asset('storage/' . $member->foto) }}" alt="Foto Lama"
-                    class="w-20 h-24 object-cover rounded border">
-                <span class="text-xs text-gray-500">Foto saat ini</span>
+            <div class="mt-2 flex items-center gap-3">
+                <img src="{{ asset($member->foto) }}" alt="Foto Lama"
+                    class="w-16 h-20 object-cover rounded border border-gray-300 shadow-sm">
+                <span class="text-xs text-green-600 font-bold"><i class="fa-solid fa-check-circle"></i> Foto
+                    Tersimpan</span>
             </div>
         @endif
-
-        <input type="file" name="foto"
-            class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:border-purple-400 focus:outline-none focus:shadow-outline-purple">
-        @error('foto')
-            <span class="text-xs text-red-600">{{ $message }}</span>
-        @enderror
     </div>
 
 </div>
 
-<hr class="my-8 border-gray-300">
-<h3 class="text-lg font-semibold text-gray-700 mb-4">Berkas Persyaratan (Lampiran)</h3>
+{{-- SECTION: BERKAS PERSYARATAN --}}
+<hr class="my-8 border-gray-300 border-dashed">
+<div class="flex items-center gap-2 mb-4">
+    <i class="fa-solid fa-folder-open text-purple-600 text-xl"></i>
+    <h3 class="text-lg font-bold text-gray-800">Berkas Persyaratan (Lampiran)</h3>
+</div>
 
-<div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
-
+<div class="grid grid-cols-1 gap-6 sm:grid-cols-3 bg-gray-50 p-5 rounded-xl border border-gray-200">
     <div>
-        <label class="block text-sm font-bold text-gray-700">Scan Sertifikat Tanah (Wajib)</label>
+        <label class="block text-sm font-bold text-gray-700 mb-1">Scan Sertifikat Tanah (Wajib)</label>
+        <x-forms.upload-file name="file_sertifikat_tanah" accept=".pdf,image/*" />
+        <p class="text-[10px] text-gray-500 mt-1 mb-2">PDF/JPG (Max 2MB)</p>
         @if (isset($member) && $member->file_sertifikat_tanah)
-            <div class="mb-2 text-xs">
-                <a href="{{ asset('storage/' . $member->file_sertifikat_tanah) }}" target="_blank"
-                    class="text-blue-600 underline hover:text-blue-800">
-                    Lihat File Saat Ini
-                </a>
-            </div>
+            <a href="{{ asset($member->file_sertifikat_tanah) }}" target="_blank"
+                class="inline-flex items-center gap-1 text-xs text-blue-600 font-semibold bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 transition">
+                <i class="fa-solid fa-eye"></i> Lihat File
+            </a>
         @endif
-        <input type="file" name="file_sertifikat_tanah"
-            class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
-        <span class="text-xs text-gray-500">PDF/JPG (Max 2MB)</span>
-        @error('file_sertifikat_tanah')
-            <span class="text-xs text-red-600 block">{{ $message }}</span>
-        @enderror
     </div>
 
     <div>
-        <label class="block text-sm font-bold text-gray-700">Scan KTP</label>
+        <label class="block text-sm font-bold text-gray-700 mb-1">Scan KTP</label>
+        <x-forms.upload-file name="file_ktp" accept=".pdf,image/*" />
+        <p class="text-[10px] text-gray-500 mt-1 mb-2">PDF/JPG (Max 2MB)</p>
         @if (isset($member) && $member->file_ktp)
-            <div class="mb-2 text-xs">
-                <a href="{{ asset('storage/' . $member->file_ktp) }}" target="_blank"
-                    class="text-blue-600 underline hover:text-blue-800">
-                    Lihat File Saat Ini
-                </a>
-            </div>
+            <a href="{{ asset($member->file_ktp) }}" target="_blank"
+                class="inline-flex items-center gap-1 text-xs text-blue-600 font-semibold bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 transition">
+                <i class="fa-solid fa-eye"></i> Lihat File
+            </a>
         @endif
-        <input type="file" name="file_ktp"
-            class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
     </div>
 
     <div>
-        <label class="block text-sm font-bold text-gray-700">Scan KK</label>
+        <label class="block text-sm font-bold text-gray-700 mb-1">Scan KK</label>
+        <x-forms.upload-file name="file_kk" accept=".pdf,image/*" />
+        <p class="text-[10px] text-gray-500 mt-1 mb-2">PDF/JPG (Max 2MB)</p>
         @if (isset($member) && $member->file_kk)
-            <div class="mb-2 text-xs">
-                <a href="{{ asset('storage/' . $member->file_kk) }}" target="_blank"
-                    class="text-blue-600 underline hover:text-blue-800">
-                    Lihat File Saat Ini
-                </a>
-            </div>
+            <a href="{{ asset($member->file_kk) }}" target="_blank"
+                class="inline-flex items-center gap-1 text-xs text-blue-600 font-semibold bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 transition">
+                <i class="fa-solid fa-eye"></i> Lihat File
+            </a>
         @endif
-        <input type="file" name="file_kk"
-            class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
     </div>
-
 </div>
 
-<hr class="my-8 border-gray-300">
-<h3 class="text-lg font-semibold text-gray-700 mb-4">Pembayaran Administrasi (Rp 150.000)</h3>
+{{-- SECTION: PEMBAYARAN --}}
+<hr class="my-8 border-gray-300 border-dashed">
+<div class="flex items-center gap-2 mb-4">
+    <i class="fa-solid fa-money-bill-wave text-green-600 text-xl"></i>
+    <h3 class="text-lg font-bold text-gray-800">Pembayaran Administrasi (Rp 150.000)</h3>
+</div>
 
-<div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 bg-green-50 p-5 rounded-xl border border-green-200">
     <div>
-        <label class="block text-sm font-bold text-gray-700">Bukti Transfer / Kwitansi Manual</label>
+        <label class="block text-sm font-bold text-gray-700 mb-1">Bukti Transfer / Kwitansi Manual</label>
+        <x-forms.upload-file name="file_bukti_bayar" accept="image/*" />
+        <p class="text-[10px] text-gray-500 mt-1 mb-2">Foto Struk / Screenshot Transfer</p>
 
         @if (isset($member) && $member->file_bukti_bayar)
-            <div class="mb-2">
-                <img src="{{ asset('storage/' . $member->file_bukti_bayar) }}" class="h-24 rounded border">
-                <span class="text-xs text-green-600 font-bold">✔ Sudah Ada Bukti</span>
+            <div class="mt-2 flex items-center gap-3 bg-white p-2 rounded border border-green-200 w-max">
+                <a href="{{ asset($member->file_bukti_bayar) }}" target="_blank">
+                    <img src="{{ asset($member->file_bukti_bayar) }}"
+                        class="h-16 w-auto rounded border border-gray-200 hover:opacity-80 transition">
+                </a>
+                <span class="text-xs text-green-700 font-black tracking-wider"><i
+                        class="fa-solid fa-check-double"></i> LUNAS</span>
             </div>
         @endif
-
-        <input type="file" name="file_bukti_bayar" class="block w-full mt-1 text-sm border-gray-300">
-        <span class="text-xs text-gray-500">Foto Struk / Screenshot Transfer</span>
     </div>
 
     <div>
-        <label class="block text-sm font-bold text-gray-700">Tanggal Bayar</label>
-        <input type="date" name="tanggal_bayar"
-            value="{{ old('tanggal_bayar', isset($member) && $member->tanggal_bayar ? $member->tanggal_bayar->format('Y-m-d') : '') }}"
-            class="block w-full mt-1 text-sm border-gray-300 rounded-md">
+        <x-forms.label value="Tanggal Bayar" class="font-bold" />
+        <x-forms.input type="date" name="tanggal_bayar"
+            value="{{ old('tanggal_bayar', isset($member) && $member->tanggal_bayar ? $member->tanggal_bayar->format('Y-m-d') : '') }}" />
     </div>
-</div>
-
-<div class="flex justify-end mt-6">
-    <button type="submit"
-        class="px-5 py-2 font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
-        {{ $submit_text ?? 'Simpan Data' }}
-    </button>
 </div>

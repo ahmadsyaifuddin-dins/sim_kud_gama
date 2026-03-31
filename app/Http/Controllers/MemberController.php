@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\MemberRequest;
 use App\Models\Member;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class MemberController extends Controller
@@ -20,7 +19,6 @@ class MemberController extends Controller
         return view('members.index', compact('members'));
     }
 
-    // TAMBAHKAN METHOD APPROVE
     public function approve(Member $member)
     {
         // Ubah nomor anggota dari REG-XXX jadi KUD-GM-XXX
@@ -43,25 +41,31 @@ class MemberController extends Controller
     {
         $data = $request->validated();
 
-        // 1. Upload Foto Profil
+        // 1. Upload Foto Profil (Old School)
         if ($request->hasFile('foto')) {
-            $data['foto'] = $request->file('foto')->store('members-photos', 'public');
+            $file = $request->file('foto');
+            $filename = time().'_foto_'.$file->getClientOriginalName();
+            $file->move(public_path('uploads/members/photos'), $filename);
+            $data['foto'] = 'uploads/members/photos/'.$filename;
         }
 
-        // 2. Upload Dokumen Persyaratan
-        if ($request->hasFile('file_sertifikat_tanah')) {
-            $data['file_sertifikat_tanah'] = $request->file('file_sertifikat_tanah')->store('members-docs', 'public');
-        }
-        if ($request->hasFile('file_ktp')) {
-            $data['file_ktp'] = $request->file('file_ktp')->store('members-docs', 'public');
-        }
-        if ($request->hasFile('file_kk')) {
-            $data['file_kk'] = $request->file('file_kk')->store('members-docs', 'public');
+        // 2. Upload Dokumen Persyaratan (Old School)
+        $docs = ['file_sertifikat_tanah', 'file_ktp', 'file_kk'];
+        foreach ($docs as $doc) {
+            if ($request->hasFile($doc)) {
+                $file = $request->file($doc);
+                $filename = time().'_'.$doc.'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/members/docs'), $filename);
+                $data[$doc] = 'uploads/members/docs/'.$filename;
+            }
         }
 
-        // 3. Upload Bukti Bayar (PERBAIKAN: Harus dicek dulu ada filenya atau tidak)
+        // 3. Upload Bukti Bayar (Old School)
         if ($request->hasFile('file_bukti_bayar')) {
-            $data['file_bukti_bayar'] = $request->file('file_bukti_bayar')->store('members-payments', 'public');
+            $file = $request->file('file_bukti_bayar');
+            $filename = time().'_payment_'.$file->getClientOriginalName();
+            $file->move(public_path('uploads/members/payments'), $filename);
+            $data['file_bukti_bayar'] = 'uploads/members/payments/'.$filename;
 
             // Otomatis set tanggal bayar hari ini jika user tidak isi manual
             if (empty($data['tanggal_bayar'])) {
@@ -83,31 +87,42 @@ class MemberController extends Controller
     {
         $data = $request->validated();
 
-        // Helper array untuk file-file umum (Foto & Dokumen)
-        $files = ['foto', 'file_sertifikat_tanah', 'file_ktp', 'file_kk'];
+        // 1. Update Foto Profil
+        if ($request->hasFile('foto')) {
+            if ($member->foto && file_exists(public_path($member->foto))) {
+                unlink(public_path($member->foto));
+            }
+            $file = $request->file('foto');
+            $filename = time().'_foto_'.$file->getClientOriginalName();
+            $file->move(public_path('uploads/members/photos'), $filename);
+            $data['foto'] = 'uploads/members/photos/'.$filename;
+        }
 
-        foreach ($files as $fileKey) {
-            if ($request->hasFile($fileKey)) {
-                // Hapus file lama jika ada
-                if ($member->$fileKey) {
-                    Storage::disk('public')->delete($member->$fileKey);
+        // 2. Update Dokumen Persyaratan
+        $docs = ['file_sertifikat_tanah', 'file_ktp', 'file_kk'];
+        foreach ($docs as $doc) {
+            if ($request->hasFile($doc)) {
+                if ($member->$doc && file_exists(public_path($member->$doc))) {
+                    unlink(public_path($member->$doc));
                 }
-                // Tentukan folder: foto ke 'members-photos', sisanya ke 'members-docs'
-                $folder = ($fileKey == 'foto') ? 'members-photos' : 'members-docs';
-                $data[$fileKey] = $request->file($fileKey)->store($folder, 'public');
+                $file = $request->file($doc);
+                $filename = time().'_'.$doc.'_'.$file->getClientOriginalName();
+                $file->move(public_path('uploads/members/docs'), $filename);
+                $data[$doc] = 'uploads/members/docs/'.$filename;
             }
         }
 
-        // Handle Bukti Bayar secara terpisah agar aman
+        // 3. Update Bukti Bayar
         if ($request->hasFile('file_bukti_bayar')) {
-            // Hapus bukti bayar lama jika ada (Biar server gak penuh sampah)
-            if ($member->file_bukti_bayar) {
-                Storage::disk('public')->delete($member->file_bukti_bayar);
+            if ($member->file_bukti_bayar && file_exists(public_path($member->file_bukti_bayar))) {
+                unlink(public_path($member->file_bukti_bayar));
             }
+            $file = $request->file('file_bukti_bayar');
+            $filename = time().'_payment_'.$file->getClientOriginalName();
+            $file->move(public_path('uploads/members/payments'), $filename);
+            $data['file_bukti_bayar'] = 'uploads/members/payments/'.$filename;
 
-            $data['file_bukti_bayar'] = $request->file('file_bukti_bayar')->store('members-payments', 'public');
-
-            // Set tanggal bayar otomatis saat update bukti
+            // Set tanggal bayar otomatis saat update bukti jika kosong
             if (empty($data['tanggal_bayar'])) {
                 $data['tanggal_bayar'] = now();
             }
@@ -120,24 +135,24 @@ class MemberController extends Controller
 
     public function destroy(Member $member)
     {
-        // Hapus semua file yang nyangkut (termasuk bukti bayar)
+        // Hapus semua file secara Old School (unlink) sebelum hapus data dari DB
         $files = [
             $member->foto,
             $member->file_sertifikat_tanah,
             $member->file_ktp,
             $member->file_kk,
-            $member->file_bukti_bayar, // Jangan lupa hapus ini juga
+            $member->file_bukti_bayar,
         ];
 
         foreach ($files as $path) {
-            if ($path) {
-                Storage::disk('public')->delete($path);
+            if ($path && file_exists(public_path($path))) {
+                unlink(public_path($path));
             }
         }
 
         $member->delete();
 
-        return redirect()->route('members.index')->with('success', 'Anggota berhasil dihapus.');
+        return redirect()->route('members.index')->with('success', 'Anggota beserta seluruh berkas berhasil dihapus.');
     }
 
     public function printCard(Member $member)
@@ -149,8 +164,6 @@ class MemberController extends Controller
 
         $validationUrl = route('members.check', $member->id);
 
-        // 1. Pakai format('svg') biar gak butuh ImageMagick
-        // 2. Bungkus pakai base64_encode biar jadi string gambar yang aman buat PDF
         $qrCode = base64_encode(QrCode::format('svg')->size(100)->errorCorrection('H')->generate($validationUrl));
 
         $pdf = Pdf::loadView('members.card_pdf', compact('member', 'qrCode'));
@@ -161,7 +174,6 @@ class MemberController extends Controller
 
     public function printReceipt(Member $member)
     {
-        // Cek dulu, sudah bayar belum?
         if (! $member->file_bukti_bayar) {
             return back()->with('error', 'Anggota ini belum melakukan pembayaran!');
         }

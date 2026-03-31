@@ -19,7 +19,6 @@
             background-image: linear-gradient(to bottom right, #ffffff, #e6ffe6);
             border-radius: 8px;
             overflow: hidden;
-            /* Supaya header hijau ikut melengkung di sudut */
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
         }
 
@@ -30,7 +29,6 @@
             color: white;
             padding: 4px 8px;
             height: 38px;
-            /* Tinggi disesuaikan biar muat logo & teks */
             width: 100%;
             box-sizing: border-box;
         }
@@ -55,7 +53,6 @@
         .header h2 {
             margin: 0;
             font-size: 13px;
-            /* Ukuran judul diperjelas */
             text-transform: uppercase;
             font-weight: 900;
             letter-spacing: 1px;
@@ -67,7 +64,6 @@
         .header p {
             margin: 0;
             font-size: 5px;
-            /* SANGAT PENTING: Font kecil biar alamat panjang muat */
             line-height: 1.1;
             font-weight: normal;
         }
@@ -120,7 +116,6 @@
         .footer {
             position: absolute;
             top: 40mm;
-            /* Kunci posisi dari atas */
             right: 10px;
             width: 45mm;
             text-align: center;
@@ -160,13 +155,10 @@
             z-index: 20;
             background: white;
             padding: 2px;
-            /* Tambah padding dikit biar rapi */
             border-radius: 2px;
             overflow: hidden;
-            /* Jaga-jaga biar gak bluber */
         }
 
-        /* Tambahan: Paksa SVG ngikutin ukuran kotak */
         .qr-area svg {
             width: 100%;
             height: 100%;
@@ -201,10 +193,11 @@
         <div class="content">
             <div class="photo-area">
                 @if ($member->foto)
-                    <img src="{{ public_path('storage/' . $member->foto) }}" class="photo-box">
+                    <img src="{{ public_path($member->foto) }}" class="photo-box">
                 @else
                     <div class="photo-box" style="line-height: 25mm; font-size: 8px;">No Photo</div>
                 @endif
+
                 <div style="font-size: 8px; margin-top: 3px; font-weight: bold; color: #166534;">
                     {{ $member->nomor_anggota }}
                 </div>
@@ -219,7 +212,7 @@
                 </div>
                 <div class="row">
                     <span class="label">TTL</span>: {{ $member->tempat_lahir }},
-                    {{ $member->tanggal_lahir->format('d-m-Y') }}
+                    {{ \Carbon\Carbon::parse($member->tanggal_lahir)->format('d-m-Y') }}
                 </div>
                 <div class="row">
                     <span class="label">Alamat</span>: {{ Str::limit($member->alamat_lengkap, 25) }}
@@ -242,14 +235,13 @@
 
         <div class="footer">
             <p>Ketua KUD Gajah Mada</p>
-            <div class="sign-area">
-            </div>
+            <div class="sign-area"></div>
             <p><u>( ........................... )</u></p>
         </div>
     </div>
 
     <p style="font-size: 10px; color: gray; margin-top: 10px;">
-        *Silakan gunting sesuai garis kotak. Kartu ini sah sebagai identitas anggota.
+        *Silakan gunting sesuai garis kotak. Kartu ini sah sebagai identitas resmi anggota KUD Gajah Mada.
     </p>
 
 </body>
