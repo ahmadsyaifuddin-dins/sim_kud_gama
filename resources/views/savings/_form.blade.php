@@ -1,11 +1,9 @@
-@props(['saving' => null])
-
+@csrf
 <div class="grid grid-cols-1 gap-6">
 
     <div>
-        <label class="block text-sm font-medium text-gray-700">Pilih Anggota</label>
-        <select name="member_id"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500">
+        <x-forms.label value="Pilih Anggota" required="true" />
+        <x-forms.dropdown name="member_id" required>
             <option value="">-- Cari Nama Anggota --</option>
             @foreach ($members as $member)
                 <option value="{{ $member->id }}"
@@ -13,85 +11,69 @@
                     {{ $member->nomor_anggota }} - {{ $member->nama_lengkap }}
                 </option>
             @endforeach
-        </select>
-        @error('member_id')
-            <span class="text-red-500 text-xs">{{ $message }}</span>
-        @enderror
+        </x-forms.dropdown>
     </div>
 
     <div>
-        <label class="block text-sm font-medium text-gray-700">Jenis Simpanan</label>
-        <div class="mt-2 flex gap-4">
-            <label class="inline-flex items-center">
-                <input type="radio" name="jenis_simpanan" value="pokok" class="text-pink-600 focus:ring-pink-500"
-                    {{ old('jenis_simpanan', $saving->jenis_simpanan ?? '') == 'pokok' ? 'checked' : '' }}>
-                <span class="ml-2">Pokok</span>
+        <x-forms.label value="Jenis Simpanan" required="true" />
+        <div class="mt-2 flex flex-wrap gap-6">
+            <label class="inline-flex items-center cursor-pointer">
+                <input type="radio" name="jenis_simpanan" value="pokok"
+                    class="text-pink-600 focus:ring-pink-500 h-5 w-5 cursor-pointer"
+                    {{ old('jenis_simpanan', $saving->jenis_simpanan ?? '') == 'pokok' ? 'checked' : '' }} required>
+                <span class="ml-2 text-sm text-gray-700 font-semibold">Simpanan Pokok</span>
             </label>
-            <label class="inline-flex items-center">
-                <input type="radio" name="jenis_simpanan" value="wajib" class="text-pink-600 focus:ring-pink-500"
-                    {{ old('jenis_simpanan', $saving->jenis_simpanan ?? 'wajib') == 'wajib' ? 'checked' : '' }}>
-                <span class="ml-2">Wajib</span>
+            <label class="inline-flex items-center cursor-pointer">
+                <input type="radio" name="jenis_simpanan" value="wajib"
+                    class="text-pink-600 focus:ring-pink-500 h-5 w-5 cursor-pointer"
+                    {{ old('jenis_simpanan', $saving->jenis_simpanan ?? 'wajib') == 'wajib' ? 'checked' : '' }}
+                    required>
+                <span class="ml-2 text-sm text-gray-700 font-semibold">Simpanan Wajib</span>
             </label>
-            <label class="inline-flex items-center">
-                <input type="radio" name="jenis_simpanan" value="sukarela" class="text-pink-600 focus:ring-pink-500"
-                    {{ old('jenis_simpanan', $saving->jenis_simpanan ?? '') == 'sukarela' ? 'checked' : '' }}>
-                <span class="ml-2">Sukarela</span>
+            <label class="inline-flex items-center cursor-pointer">
+                <input type="radio" name="jenis_simpanan" value="sukarela"
+                    class="text-pink-600 focus:ring-pink-500 h-5 w-5 cursor-pointer"
+                    {{ old('jenis_simpanan', $saving->jenis_simpanan ?? '') == 'sukarela' ? 'checked' : '' }} required>
+                <span class="ml-2 text-sm text-gray-700 font-semibold">Simpanan Sukarela</span>
             </label>
         </div>
-        @error('jenis_simpanan')
-            <span class="text-red-500 text-xs">{{ $message }}</span>
-        @enderror
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-            <label class="block text-sm font-medium text-gray-700">Jumlah (Rp)</label>
-            <input type="number" name="jumlah" value="{{ old('jumlah', $saving->jumlah ?? '') }}"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                placeholder="Contoh: 50000">
-            @error('jumlah')
-                <span class="text-red-500 text-xs">{{ $message }}</span>
-            @enderror
+            <x-forms.label value="Jumlah (Rp)" required="true" />
+            <x-forms.currency name="jumlah" value="{{ old('jumlah', isset($saving) ? round($saving->jumlah) : '') }}"
+                placeholder="Contoh: 50000" required />
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700">Tanggal Bayar</label>
-            <input type="date" name="tanggal_bayar"
-                value="{{ old('tanggal_bayar', isset($saving) ? $saving->tanggal_bayar->format('Y-m-d') : date('Y-m-d')) }}"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500">
-            @error('tanggal_bayar')
-                <span class="text-red-500 text-xs">{{ $message }}</span>
-            @enderror
+            <x-forms.label value="Tanggal Bayar" required="true" />
+            <x-forms.input type="date" name="tanggal_bayar"
+                value="{{ old('tanggal_bayar', isset($saving) ? \Carbon\Carbon::parse($saving->tanggal_bayar)->format('Y-m-d') : date('Y-m-d')) }}"
+                required />
         </div>
     </div>
 
     <div>
-        <label class="block text-sm font-medium text-gray-700">Keterangan (Opsional)</label>
-        <input type="text" name="keterangan" value="{{ old('keterangan', $saving->keterangan ?? '') }}"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-            placeholder="Contoh: Iuran Bulan Januari 2025">
+        <x-forms.label value="Keterangan (Opsional)" />
+        <x-forms.input type="text" name="keterangan" value="{{ old('keterangan', $saving->keterangan ?? '') }}"
+            placeholder="Contoh: Iuran Wajib Bulan Januari 2026" />
     </div>
 
     <div>
-        <label class="block text-sm font-medium text-gray-700">Bukti Transfer (Jika Ada)</label>
+        <x-forms.label value="Bukti Transfer (Jika Ada)" />
+        <x-forms.upload-file name="bukti_transfer" accept="image/*" />
+
         @if (isset($saving) && $saving->bukti_transfer)
-            <div class="mb-2">
-                <a href="{{ asset('storage/' . $saving->bukti_transfer) }}" target="_blank"
-                    class="text-blue-600 text-sm underline">Lihat File Saat Ini</a>
+            <div class="mt-3">
+                <p class="text-sm text-gray-500 mb-1 font-semibold">Bukti Saat Ini:</p>
+                <a href="{{ asset($saving->bukti_transfer) }}" target="_blank" class="inline-block">
+                    <img src="{{ asset($saving->bukti_transfer) }}" alt="Bukti Transfer"
+                        class="h-24 w-auto rounded-lg object-cover border-2 border-pink-200 shadow-sm hover:opacity-80 transition">
+                </a>
             </div>
         @endif
-        <input type="file" name="bukti_transfer"
-            class="mt-1 block w-full text-sm border border-gray-300 rounded-md p-1">
-        @error('bukti_transfer')
-            <span class="text-red-500 text-xs">{{ $message }}</span>
-        @enderror
-    </div>
-
-    <div class="flex justify-end gap-3 pt-4 border-t">
-        <a href="{{ route('savings.index') }}"
-            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Batal</a>
-        <button type="submit" class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700">Simpan
-            Transaksi</button>
+        <p class="text-xs text-gray-400 mt-1">*Opsional. Max 2MB (JPG/PNG/WEBP). Kosongkan jika tidak ada perubahan.</p>
     </div>
 
 </div>

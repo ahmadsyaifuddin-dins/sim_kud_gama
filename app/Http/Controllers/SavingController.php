@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SavingRequest;
 use App\Models\Member;
 use App\Models\Saving;
-use Illuminate\Support\Facades\Storage;
 
 class SavingController extends Controller
 {
@@ -31,9 +30,16 @@ class SavingController extends Controller
     {
         $data = $request->validated();
 
-        // 1. Upload Bukti Transfer jika ada
+        // 1. Upload Bukti Transfer (Old School Way)
         if ($request->hasFile('bukti_transfer')) {
-            $data['bukti_transfer'] = $request->file('bukti_transfer')->store('savings-proof', 'public');
+            $file = $request->file('bukti_transfer');
+            $filename = time().'_'.$file->getClientOriginalName();
+
+            // Pindahkan langsung ke public/uploads/savings
+            $file->move(public_path('uploads/savings'), $filename);
+
+            // Simpan path-nya saja ke DB
+            $data['bukti_transfer'] = 'uploads/savings/'.$filename;
         }
 
         // 2. Catat User yang menginput (Admin yang login)
@@ -56,11 +62,17 @@ class SavingController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('bukti_transfer')) {
-            // Hapus file lama
-            if ($saving->bukti_transfer) {
-                Storage::disk('public')->delete($saving->bukti_transfer);
+            // Hapus file lama jika ada (Old School Way)
+            if ($saving->bukti_transfer && file_exists(public_path($saving->bukti_transfer))) {
+                unlink(public_path($saving->bukti_transfer));
             }
-            $data['bukti_transfer'] = $request->file('bukti_transfer')->store('savings-proof', 'public');
+
+            // Upload file baru
+            $file = $request->file('bukti_transfer');
+            $filename = time().'_'.$file->getClientOriginalName();
+            $file->move(public_path('uploads/savings'), $filename);
+
+            $data['bukti_transfer'] = 'uploads/savings/'.$filename;
         }
 
         $saving->update($data);
@@ -70,8 +82,9 @@ class SavingController extends Controller
 
     public function destroy(Saving $saving)
     {
-        if ($saving->bukti_transfer) {
-            Storage::disk('public')->delete($saving->bukti_transfer);
+        // Hapus file dari folder public sebelum data dihapus dari DB
+        if ($saving->bukti_transfer && file_exists(public_path($saving->bukti_transfer))) {
+            unlink(public_path($saving->bukti_transfer));
         }
 
         $saving->delete();
