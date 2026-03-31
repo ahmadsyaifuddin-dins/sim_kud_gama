@@ -38,6 +38,10 @@
                     </th>
                     <th
                         class="px-5 py-3 text-xs font-semibold tracking-wider text-center text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200">
+                        Role
+                    </th>
+                    <th
+                        class="px-5 py-3 text-xs font-semibold tracking-wider text-center text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200">
                         Action
                     </th>
                 </tr>
@@ -61,6 +65,15 @@
                         </td>
                         <td class="px-5 py-5 text-sm bg-white border-b border-gray-200">
                             <p class="text-gray-900 whitespace-no-wrap">{{ $user->email }}</p>
+                        </td>
+                        <td class="px-5 py-5 text-sm bg-white border-b border-gray-200 text-center">
+                            @if ($user->role === 'admin')
+                                <span
+                                    class="px-3 py-1 text-xs font-bold text-blue-800 bg-blue-100 rounded-full">Admin</span>
+                            @else
+                                <span
+                                    class="px-3 py-1 text-xs font-bold text-green-800 bg-green-100 rounded-full">Pimpinan</span>
+                            @endif
                         </td>
                         <td class="px-5 py-5 text-sm bg-white border-b border-gray-200 text-center">
                             <div class="flex justify-center space-x-2">

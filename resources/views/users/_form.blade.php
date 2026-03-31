@@ -21,6 +21,21 @@
     </div>
 
     <div>
+        <label class="block text-sm text-gray-700">Role / Hak Akses</label>
+        <select name="role"
+            class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-400 focus:outline-none focus:shadow-outline-blue"
+            required>
+            <option value="admin" {{ old('role', $user->role ?? '') == 'admin' ? 'selected' : '' }}>Administrator
+            </option>
+            <option value="pimpinan" {{ old('role', $user->role ?? '') == 'pimpinan' ? 'selected' : '' }}>Pimpinan /
+                Ketua KUD</option>
+        </select>
+        @error('role')
+            <span class="text-xs text-red-600">{{ $message }}</span>
+        @enderror
+    </div>
+
+    <div>
         <label class="block text-sm text-gray-700">
             Password
             @if (isset($user))
