@@ -47,7 +47,7 @@ class MemberRequest extends FormRequest
             'tanggal_bayar' => 'nullable|date',
             'status' => 'sometimes|in:active,inactive,stopped,pending',
 
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ];
     }
 
