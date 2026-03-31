@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ManagementRequest;
 use App\Models\Management;
-use Illuminate\Support\Facades\Storage;
 
 class ManagementController extends Controller
 {
@@ -27,8 +26,16 @@ class ManagementController extends Controller
     {
         $data = $request->validated();
 
+        // UPLOAD OLD SCHOOL
         if ($request->hasFile('foto')) {
-            $data['foto'] = $request->file('foto')->store('managements-photos', 'public');
+            $file = $request->file('foto');
+            $filename = time().'_'.$file->getClientOriginalName();
+
+            // Pindah langsung ke public/uploads/managements
+            $file->move(public_path('uploads/managements'), $filename);
+
+            // Simpan path-nya saja ke DB
+            $data['foto'] = 'uploads/managements/'.$filename;
         }
 
         // Set default is_active ke true (1) kalau tidak dikirim form
@@ -50,12 +57,21 @@ class ManagementController extends Controller
     {
         $data = $request->validated();
 
+        // UPLOAD OLD SCHOOL (Dengan hapus foto lama)
         if ($request->hasFile('foto')) {
-            // Hapus foto lama
-            if ($management->foto) {
-                Storage::disk('public')->delete($management->foto);
+            // Cek dan hapus foto lama jika ada
+            if ($management->foto && file_exists(public_path($management->foto))) {
+                unlink(public_path($management->foto));
             }
-            $data['foto'] = $request->file('foto')->store('managements-photos', 'public');
+
+            $file = $request->file('foto');
+            $filename = time().'_'.$file->getClientOriginalName();
+
+            // Pindah langsung ke public/uploads/managements
+            $file->move(public_path('uploads/managements'), $filename);
+
+            // Timpa path-nya di array data
+            $data['foto'] = 'uploads/managements/'.$filename;
         }
 
         // Checkbox handling: jika tidak dicentang, nilainya 0
@@ -68,8 +84,9 @@ class ManagementController extends Controller
 
     public function destroy(Management $management)
     {
-        if ($management->foto) {
-            Storage::disk('public')->delete($management->foto);
+        // HAPUS FOTO OLD SCHOOL SEBELUM HAPUS DATA
+        if ($management->foto && file_exists(public_path($management->foto))) {
+            unlink(public_path($management->foto));
         }
 
         $management->delete();

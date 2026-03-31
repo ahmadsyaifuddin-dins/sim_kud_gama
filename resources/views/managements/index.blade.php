@@ -46,7 +46,7 @@
                                     <div class="flex items-center text-sm">
                                         <div class="relative hidden w-10 h-10 mr-3 rounded-full md:block">
                                             <img class="object-cover w-full h-full rounded-full border"
-                                                src="{{ $item->foto ? asset('storage/' . $item->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($item->nama) }}"
+                                                src="{{ $item->foto ? asset($item->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($item->nama) }}"
                                                 alt="" loading="lazy" />
                                         </div>
                                         <div>
