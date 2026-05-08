@@ -63,6 +63,11 @@ Route::middleware('auth')->group(function () {
         Route::patch('/pinjaman/{pinjaman}/update-status', [PinjamanController::class, 'updateStatus'])
             ->name('pinjaman.update-status');
 
+        Route::post('/pinjaman/remind-all', [PinjamanController::class, 'sendGlobalReminder'])->name('pinjaman.remind-all');
+
+        // Route untuk Trigger Spesifik/Personal
+        Route::post('/pinjaman/{pinjaman}/remind', [PinjamanController::class, 'sendManualReminder'])->name('pinjaman.remind');
+
         Route::resource('angsuran', AngsuranController::class);
 
         // Modul Pengurus
