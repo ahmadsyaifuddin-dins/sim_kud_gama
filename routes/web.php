@@ -59,6 +59,10 @@ Route::middleware('auth')->group(function () {
 
         // Modul Pinjaman & Angsuran
         Route::resource('pinjaman', PinjamanController::class);
+
+        Route::patch('/pinjaman/{pinjaman}/update-status', [PinjamanController::class, 'updateStatus'])
+            ->name('pinjaman.update-status');
+
         Route::resource('angsuran', AngsuranController::class);
 
         // Modul Pengurus
