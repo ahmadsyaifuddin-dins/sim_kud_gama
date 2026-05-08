@@ -13,30 +13,41 @@ class BackupController extends Controller
         $username = env('DB_USERNAME', 'root');
         $password = env('DB_PASSWORD', '');
         $host = env('DB_HOST', '127.0.0.1');
+        $port = env('DB_PORT', '3306');
 
-        // Ambil path dari .env (untuk lokal Laragon) atau gunakan default (untuk server cPanel/VPS)
         $dumpPath = env('DB_DUMP_PATH', 'mysqldump');
+
+        // Validasi keberadaan file mysqldump
+        if ($dumpPath !== 'mysqldump' && ! File::exists($dumpPath)) {
+            return back()->withErrors([
+                'backup' => "Gagal backup: File mysqldump tidak ditemukan di lokasi: [ {$dumpPath} ]. ".
+                            'Silakan periksa kembali folder instalasi Laragon/XAMPP Anda.',
+            ]);
+        }
 
         $fileName = 'backup_kud_gama_'.now()->format('Y-m-d_H-i-s').'.sql';
         $filePath = storage_path('app/'.$fileName);
 
         $passwordString = $password ? "--password={$password}" : '';
 
-        // Eksekusi mysqldump tanpa simbol '>'
-        $command = "\"{$dumpPath}\" --user={$username} {$passwordString} --host={$host} {$database}";
+        // Tambahkan --port agar koneksi TCP/IP lebih terarah
+        $command = "\"{$dumpPath}\" --user={$username} {$passwordString} --host={$host} --port={$port} {$database}";
 
-        // Jalankan perintah
-        $result = Process::run($command);
+        // Trik khusus Windows: Suntikkan SYSTEMROOT agar mysqldump bisa menggunakan jaringan TCP/IP
+        $systemRoot = getenv('SYSTEMROOT') ?: 'C:\Windows';
+
+        $result = Process::env([
+            'SYSTEMROOT' => $systemRoot,
+        ])->run($command);
 
         if ($result->successful()) {
-            // Tangkap output dan simpan ke file
             File::put($filePath, $result->output());
 
-            // Download dan otomatis hapus file dari server setelah selesai
             return response()->download($filePath)->deleteFileAfterSend(true);
         }
 
-        // Tampilkan error asli dari terminal jika masih gagal
-        return back()->withErrors(['backup' => 'Gagal backup: '.$result->errorOutput()]);
+        return back()->withErrors([
+            'backup' => 'Proses mysqldump gagal. Pesan sistem: '.$result->errorOutput(),
+        ]);
     }
 }
