@@ -1,6 +1,5 @@
 @if (session('success'))
-    <div {{ $attributes->merge(['class' => 'bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded shadow-sm']) }}
-        role="alert">
+    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded shadow-sm" role="alert">
         <div class="flex">
             <div class="py-1">
                 <svg class="w-6 h-6 text-green-500 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AngsuranController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\ManagementController;
@@ -40,6 +41,8 @@ Route::middleware('auth')->group(function () {
     // RUTE KHUSUS ADMIN (DIKUNCI DENGAN MIDDLEWARE ROLE)
     // ==========================================================
     Route::middleware('role:admin')->group(function () {
+
+        Route::get('/backup/database', [BackupController::class, 'downloadSql'])->name('backup.database');
 
         // Modul Manajemen User
         Route::resource('users', UserController::class);
