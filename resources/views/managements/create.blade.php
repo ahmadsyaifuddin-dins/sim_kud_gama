@@ -13,12 +13,15 @@
                         @csrf
                         @include('managements._form')
 
-                        <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
+                        <div class="flex items-center justify-end gap-3 mt-8 pt-4 border-t border-gray-200">
                             <a href="{{ route('managements.index') }}"
-                                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition font-medium">Batal</a>
+                                class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition font-medium">
+                                <i class="fa-solid fa-arrow-left mr-2"></i> Batal
+                            </a>
                             <button type="submit"
-                                class="px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition font-medium">Simpan
-                                Pengurus</button>
+                                class="inline-flex items-center px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 focus:ring-4 focus:ring-pink-300 transition font-medium shadow-sm">
+                                <i class="fa-solid fa-floppy-disk mr-2"></i> Simpan Pengurus
+                            </button>
                         </div>
                     </form>
                 </div>
