@@ -46,7 +46,6 @@
                                 <td class="px-4 py-3">
                                     <div class="flex items-center text-sm">
                                         <div class="relative hidden w-12 h-12 mr-3 rounded-full md:block">
-                                            {{-- PERBAIKAN: Hapus tulisan storage/ --}}
                                             <img class="object-cover w-full h-full rounded-full border-2 border-gray-200 shadow-sm"
                                                 src="{{ $member->foto ? asset($member->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($member->nama_lengkap) . '&background=random' }}"
                                                 alt="{{ $member->nama_lengkap }}" loading="lazy" />
