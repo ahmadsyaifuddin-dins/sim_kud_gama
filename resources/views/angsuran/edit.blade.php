@@ -1,21 +1,25 @@
 <x-app-layout>
     <x-slot name="header">
-        Edit Pembayaran Angsuran
+        {{ __('Edit Pembayaran Angsuran') }}
     </x-slot>
 
     <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-pink-600">
         <x-alerts.error />
 
         <form action="{{ route('angsuran.update', $angsuran->id) }}" method="POST" enctype="multipart/form-data">
-            @method('PUT')
+            @csrf @method('PUT')
 
-            @include('angsuran._form')
+            @include('angsuran._form', ['angsuran' => $angsuran])
 
-            <div class="mt-6 flex justify-end gap-3">
+            <div class="flex items-center justify-end gap-3 mt-8 pt-4 border-t border-slate-200">
                 <a href="{{ route('angsuran.index') }}"
-                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">Batal</a>
+                    class="inline-flex items-center px-4 py-2 bg-slate-200 text-slate-700 rounded-md hover:bg-slate-300 transition font-medium">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Batal
+                </a>
                 <button type="submit"
-                    class="px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition">Update Data</button>
+                    class="inline-flex items-center px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 focus:ring-4 focus:ring-pink-300 transition font-medium shadow-sm">
+                    <i class="fa-solid fa-floppy-disk mr-2"></i> Update Data
+                </button>
             </div>
         </form>
     </div>
