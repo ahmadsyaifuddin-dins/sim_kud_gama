@@ -164,14 +164,22 @@ class ReportController extends Controller
         // 5. LAPORAN ANGSURAN MASUK
         if ($reportType == 'angsuran_masuk') {
             $query = Angsuran::with('pinjaman.member');
-            if ($request->start_date && $request->end_date) {
+
+            // Cek apakah tanggal disubmit dan tidak kosong menggunakan method filled() bawaan Laravel
+            if ($request->filled('start_date') && $request->filled('end_date')) {
                 $query->whereBetween('tanggal_bayar', [$request->start_date, $request->end_date]);
+
+                // Subtitle jika difilter per tanggal
+                $subtitle = 'Periode Bayar: '.\Carbon\Carbon::parse($request->start_date)->translatedFormat('d M Y').' s/d '.\Carbon\Carbon::parse($request->end_date)->translatedFormat('d M Y');
+            } else {
+                // Subtitle jika export semua data
+                $subtitle = 'Periode Bayar: Seluruh Data (Semua Waktu)';
             }
+
             $data = $query->orderBy('tanggal_bayar', 'asc')->get();
             $totalAngsuran = $data->sum('jumlah_bayar');
 
             $title = 'Laporan Pemasukan Angsuran Anggota';
-            $subtitle = 'Periode Bayar: '.\Carbon\Carbon::parse($request->start_date)->translatedFormat('d M Y').' s/d '.\Carbon\Carbon::parse($request->end_date)->translatedFormat('d M Y');
 
             $pdf = Pdf::loadView('reports.pdf_angsuran_masuk', compact('data', 'title', 'subtitle', 'totalAngsuran'));
 
