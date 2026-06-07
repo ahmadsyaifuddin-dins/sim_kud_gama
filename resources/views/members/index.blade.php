@@ -146,9 +146,15 @@
                                                 <i class="fa-solid fa-file-invoice-dollar"></i>
                                             </a>
                                         @else
-                                            <button
-                                                onclick="alert('Anggota ini belum melakukan pembayaran administrasi! Silakan upload bukti bayar di menu Edit terlebih dahulu.')"
-                                                class="w-8 h-8 flex items-center justify-center text-gray-400 bg-gray-200 rounded-lg cursor-not-allowed"
+                                            <button type="button"
+                                                onclick="Swal.fire({
+                                                    icon: 'warning',
+                                                    title: 'Fitur Terkunci!',
+                                                    text: 'Anggota ini belum melakukan pembayaran administrasi! Silakan upload bukti bayar di menu Edit terlebih dahulu.',
+                                                    confirmButtonColor: '#3b82f6',
+                                                    confirmButtonText: 'Tutup'
+                                                })"
+                                                class="w-8 h-8 flex items-center justify-center text-gray-400 bg-gray-200 rounded-lg cursor-not-allowed shadow-sm transition"
                                                 title="Belum Bayar (Fitur Cetak Terkunci)">
                                                 <i class="fa-solid fa-lock"></i>
                                             </button>
@@ -161,9 +167,11 @@
                                         </a>
 
                                         <form action="{{ route('members.destroy', $member->id) }}" method="POST"
-                                            onsubmit="return confirm('Yakin ingin menghapus data anggota beserta seluruh berkasnya secara permanen?')">
+                                            class="inline-block confirm-action" data-swal-title="Hapus Data Anggota?"
+                                            data-swal-text="Yakin ingin menghapus data {{ $member->nama_lengkap }} beserta seluruh berkasnya secara permanen?">
                                             @csrf
                                             @method('DELETE')
+
                                             <button type="submit"
                                                 class="w-8 h-8 flex items-center justify-center text-white bg-red-500 rounded-lg hover:bg-red-600 shadow-sm transition"
                                                 title="Hapus Permanen">

@@ -106,12 +106,15 @@
                                         </a>
 
                                         <form action="{{ route('savings.destroy', $saving->id) }}" method="POST"
-                                            onsubmit="return confirm('Hapus data transaksi ini?')">
+                                            class="inline-block confirm-action"
+                                            data-swal-title="Hapus Transaksi Simpanan?"
+                                            data-swal-text="Yakin ingin menghapus data transaksi ini? Aksi ini tidak dapat dibatalkan.">
                                             @csrf
                                             @method('DELETE')
+
                                             <button type="submit"
                                                 class="p-2 text-white bg-red-500 rounded-lg hover:bg-red-600 shadow-sm transition flex items-center justify-center"
-                                                title="Hapus">
+                                                title="Hapus Transaksi">
                                                 <i class="fa-solid fa-trash-can"></i>
                                             </button>
                                         </form>
