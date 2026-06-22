@@ -18,8 +18,9 @@
                 </div>
                 <h3 class="text-2xl font-bold text-gray-800 mb-4">Visi</h3>
                 <p class="text-gray-600 leading-relaxed text-justify">
-                    Terwujudnya Koperasi Unit Desa yang mandiri, tangguh, dan profesional sebagai penggerak utama
-                    ekonomi kerakyatan untuk meningkatkan kesejahteraan anggota dan masyarakat sekitar.
+                    Menjadi Koperasi Unit Desa berbasis Sistem Informasi Digital terdepan dan mandiri, guna mewujudkan
+                    tata kelola yang transparan, akuntabel, serta menyejahterakan seluruh petani plasma dan anggota
+                    secara berkelanjutan.
                 </p>
             </div>
 
@@ -34,31 +35,44 @@
                 <h3 class="text-2xl font-bold text-gray-800 mb-4">Misi</h3>
                 <ul class="space-y-4 text-gray-600 text-justify">
                     <li class="flex items-start">
-                        <svg class="w-6 h-6 text-pink-500 mr-3 shrink-0" fill="none" viewBox="0 0 24 24"
+                        <svg class="w-6 h-6 text-pink-500 mr-3 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
                             </path>
                         </svg>
-                        <span>Mengembangkan unit usaha yang produktif dan kompetitif (seperti simpan pinjam, penyediaan
-                            sarana produksi, atau pemasaran hasil bumi).</span>
+                        <span><strong class="text-gray-800">Digitalisasi Tata Kelola:</strong> Mengintegrasikan seluruh
+                            unit usaha (kebun plasma sawit, simpan pinjam, dan transportasi/tambang) ke dalam platform
+                            Sistem Informasi Manajemen (SIM) terpadu demi pelayanan yang cepat dan transparan.</span>
                     </li>
                     <li class="flex items-start">
-                        <svg class="w-6 h-6 text-pink-500 mr-3 shrink-0" fill="none" viewBox="0 0 24 24"
+                        <svg class="w-6 h-6 text-pink-500 mr-3 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
                             </path>
                         </svg>
-                        <span>Meningkatkan kesejahteraan ekonomi dan sosial seluruh anggota melalui pelayanan yang
-                            profesional dan transparan.</span>
+                        <span><strong class="text-gray-800">Optimalisasi Emas Hijau:</strong> Meningkatkan produktivitas
+                            kebun kelapa sawit anggota melalui pemanfaatan data SIM dan kesuksesan program Peremajaan
+                            Sawit Rakyat (PSR).</span>
                     </li>
                     <li class="flex items-start">
-                        <svg class="w-6 h-6 text-pink-500 mr-3 shrink-0" fill="none" viewBox="0 0 24 24"
+                        <svg class="w-6 h-6 text-pink-500 mr-3 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
                             </path>
                         </svg>
-                        <span>Menerapkan prinsip tata kelola koperasi yang sehat berdasarkan asas kekeluargaan dan
-                            gotong royong.</span>
+                        <span><strong class="text-gray-800">Transparansi Finansial:</strong> Menyajikan laporan keuangan
+                            dan pembagian sisa hasil usaha (SHU) secara presisi, terbuka, dan dapat diakses oleh anggota
+                            melalui sistem digital.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="w-6 h-6 text-pink-500 mr-3 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            </path>
+                        </svg>
+                        <span><strong class="text-gray-800">Kemitraan Strategis:</strong> Memperkuat sinergi data dan
+                            operasional bersama mitra utama (seperti PT Sinar Mas Group dan PT Jhonlin Baratama) demi
+                            stabilitas ekonomi daerah.</span>
                     </li>
                 </ul>
             </div>
