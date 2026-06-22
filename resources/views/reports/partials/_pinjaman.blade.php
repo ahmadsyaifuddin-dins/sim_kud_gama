@@ -12,12 +12,19 @@
             <p class="text-[11px] text-slate-500 mb-4 flex-grow">History status pengajuan kredit.</p>
             <form action="{{ route('reports.export') }}" method="GET" class="mt-auto">
                 <input type="hidden" name="report_type" value="pinjaman_rekap">
-                <select name="status_pinjaman" class="block w-full mb-3 text-xs border-slate-300 rounded-lg">
+                <select name="status_pinjaman" class="block w-full mb-2 text-xs border-slate-300 rounded-lg">
                     <option value="semua">-- Semua Status --</option>
                     <option value="menunggu">Menunggu</option>
                     <option value="disetujui">Disetujui</option>
                     <option value="ditolak">Ditolak</option>
                 </select>
+                <div class="grid grid-cols-2 gap-2 mb-1">
+                    <input type="date" name="start_date" class="block w-full text-xs border-slate-300 rounded-lg"
+                        title="Dari Tanggal">
+                    <input type="date" name="end_date" class="block w-full text-xs border-slate-300 rounded-lg"
+                        title="Sampai Tanggal">
+                </div>
+                <p class="text-[10px] text-red-500 italic mb-3">*Kosongkan tanggal untuk mengunduh seluruh data.</p>
                 <button type="submit" name="action" value="pdf"
                     class="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">
                     <i class="fa-solid fa-file-pdf"></i> Unduh PDF
@@ -63,10 +70,11 @@
             <p class="text-[11px] text-slate-500 mb-2 flex-grow">Bukti uang masuk cicilan.</p>
             <form action="{{ route('reports.export') }}" method="GET" class="mt-auto">
                 <input type="hidden" name="report_type" value="angsuran_masuk">
-                <div class="grid grid-cols-1 gap-1 mb-2">
-                    <input type="date" name="start_date" class="block w-full text-xs border-slate-300 rounded-lg">
+                <div class="grid grid-cols-2 gap-2 mb-1"> <input type="date" name="start_date"
+                        class="block w-full text-xs border-slate-300 rounded-lg">
                     <input type="date" name="end_date" class="block w-full text-xs border-slate-300 rounded-lg">
                 </div>
+                <p class="text-[10px] text-red-500 italic mb-3">*Kosongkan tanggal untuk mengunduh seluruh data.</p>
                 <button type="submit" name="action" value="pdf"
                     class="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">
                     <i class="fa-solid fa-file-pdf"></i> Unduh PDF

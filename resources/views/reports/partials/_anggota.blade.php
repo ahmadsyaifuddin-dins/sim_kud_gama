@@ -20,12 +20,13 @@
                         <option value="{{ $dusun }}">{{ $dusun }}</option>
                     @endforeach
                 </select>
-                <div class="grid grid-cols-2 gap-2 mb-3">
+                <div class="grid grid-cols-2 gap-2 mb-1">
                     <input type="date" name="start_date" class="block w-full text-xs border-slate-300 rounded-lg"
                         title="Dari Tanggal">
                     <input type="date" name="end_date" class="block w-full text-xs border-slate-300 rounded-lg"
                         title="Sampai Tanggal">
                 </div>
+                <p class="text-[10px] text-red-500 italic mb-3">*Kosongkan tanggal untuk mengunduh seluruh data.</p>
                 <button type="submit" name="action" value="pdf"
                     class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">
                     <i class="fa-solid fa-file-pdf"></i> Download PDF

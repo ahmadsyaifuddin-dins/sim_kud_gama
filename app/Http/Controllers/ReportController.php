@@ -110,7 +110,15 @@ class ReportController extends Controller
 
             $members = $query->get();
             $title = 'Laporan Data Anggota Terpadu';
-            $subtitle = 'Filter: '.($request->dusun == 'semua' ? 'Semua Wilayah' : 'Wilayah '.$request->dusun);
+
+            // Menyiapkan teks Dusun dan Periode Tanggal
+            $dusunText = (empty($request->dusun) || $request->dusun == 'semua') ? 'Semua Wilayah' : 'Wilayah '.$request->dusun;
+            $periodeText = (! empty($request->start_date) && ! empty($request->end_date))
+                ? \Carbon\Carbon::parse($request->start_date)->translatedFormat('d M Y').' s/d '.\Carbon\Carbon::parse($request->end_date)->translatedFormat('d M Y')
+                : 'Semua Waktu (Seluruh Data)';
+
+            // Gabungkan ke dalam Subtitle
+            $subtitle = "Filter: $dusunText | Periode Gabung: $periodeText";
 
             $pdf = Pdf::loadView('reports.pdf_anggota_terpadu', compact('members', 'title', 'subtitle'));
 
@@ -152,7 +160,7 @@ class ReportController extends Controller
         // B. KELOMPOK KEUANGAN & SIMPANAN
         // ====================================================================
 
-        // 4. LAPORAN PEMASUKAN PENDAFTARAN (Dulu 'finance')
+        // 4. LAPORAN PEMASUKAN PENDAFTARAN
         if ($reportType == 'pendaftaran' || $reportType == 'finance') {
             $query = Member::whereNotNull('file_bukti_bayar');
             if (! empty($request->start_date) && ! empty($request->end_date)) {
@@ -163,7 +171,13 @@ class ReportController extends Controller
             $totalPemasukan = $members->sum('biaya_pendaftaran');
 
             $title = 'Laporan Pemasukan Biaya Pendaftaran';
-            $subtitle = 'Pendaftaran Keanggotaan Baru';
+
+            // Menyiapkan teks Periode Tanggal
+            $periodeText = (! empty($request->start_date) && ! empty($request->end_date))
+                ? \Carbon\Carbon::parse($request->start_date)->translatedFormat('d M Y').' s/d '.\Carbon\Carbon::parse($request->end_date)->translatedFormat('d M Y')
+                : 'Seluruh Data (Semua Waktu)';
+
+            $subtitle = "Pendaftaran Keanggotaan Baru | Periode Bayar: $periodeText";
 
             $pdf = Pdf::loadView('reports.pdf_pendaftaran', compact('members', 'totalPemasukan', 'title', 'subtitle'));
 
