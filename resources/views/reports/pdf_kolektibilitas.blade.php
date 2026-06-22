@@ -101,7 +101,8 @@
         </tbody>
     </table>
 
-    @include('reports._signature', ['role' => 'Kepala Unit Simpan Pinjam'])
+    {{-- @include('reports._signature', ['role' => 'Kepala Unit Simpan Pinjam']) --}}
+    @include('reports._signature')
 </body>
 
 </html>

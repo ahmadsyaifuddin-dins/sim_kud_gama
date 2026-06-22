@@ -86,7 +86,7 @@
         </tbody>
     </table>
 
-    @include('reports._signature', ['role' => 'Admin Keanggotaan'])
+    @include('reports._signature')
 </body>
 
 </html>

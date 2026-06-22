@@ -67,7 +67,7 @@
         </tbody>
     </table>
 
-    @include('reports._signature', ['role' => 'Administrator Sistem'])
+    @include('reports._signature')
 </body>
 
 </html>

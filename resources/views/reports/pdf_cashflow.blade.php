@@ -115,7 +115,7 @@
         </tbody>
     </table>
 
-    @include('reports._signature', ['role' => 'Bendahara KUD'])
+    @include('reports._signature', ['type' => 'keuangan'])
 </body>
 
 </html>

@@ -71,7 +71,7 @@
         </tbody>
     </table>
 
-    @include('reports._signature', ['role' => 'Sekretaris KUD'])
+    @include('reports._signature')
 </body>
 
 </html>

@@ -84,7 +84,7 @@
         </tfoot>
     </table>
 
-    @include('reports._signature', ['role' => 'Ketua KUD'])
+    @include('reports._signature')
 </body>
 
 </html>
