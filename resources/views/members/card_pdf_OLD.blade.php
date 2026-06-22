@@ -1,3 +1,8 @@
+@php
+    $ketua = \App\Models\Management::where('jabatan', 'Ketua')->where('is_active', true)->first();
+    $namaKetua = $ketua ? $ketua->nama : 'NAMA KETUA BELUM DISET';
+@endphp
+
 <!DOCTYPE html>
 <html>
 
@@ -10,7 +15,7 @@
             padding: 20px;
         }
 
-        /* --- WRAPPER GARIS POTONG --- */
+        /* --- WRAPPER GARIS POTONG (Desain Baru) --- */
         .cut-wrapper {
             width: 86.1mm;
             padding: 0.5mm;
@@ -37,14 +42,16 @@
             border: 1px solid #000;
             position: relative;
             background-image: linear-gradient(to bottom right, #ffffff, #f0fdf4);
+            /* Gradasi putih ke hijau sangat muda */
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        /* --- HEADER --- */
+        /* --- HEADER (Modern UI Upgrade) --- */
         .header {
             background-color: #14532d;
+            /* Wajib pakai solid color untuk dompdf */
             color: #ffffff;
             padding: 4px 8px;
             height: 38px;
@@ -53,6 +60,30 @@
             position: relative;
             overflow: hidden;
             border-bottom: 2px solid #eab308;
+            /* Garis emas tetap ada */
+        }
+
+        /* Efek Modern: Lingkaran Transparan Bertumpuk */
+        .header-circle-1 {
+            position: absolute;
+            top: -15px;
+            right: -10px;
+            width: 55px;
+            height: 55px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .header-circle-2 {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            width: 35px;
+            height: 35px;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            z-index: 1;
         }
 
         .header table {
@@ -64,6 +95,7 @@
 
         .header-logo-col {
             width: 45px;
+            /* Beri lebar pasti */
             vertical-align: middle;
             text-align: left;
             padding-left: 2px;
@@ -76,6 +108,7 @@
 
         .header-spacer-col {
             width: 45px;
+            /* Lebarnya WAJIB SAMA dengan header-logo-col */
         }
 
         .header h2 {
@@ -87,6 +120,7 @@
             line-height: 1;
             margin-bottom: 2px;
             color: #ffffff;
+            /* Pastikan warna teks eksplisit */
         }
 
         .header p {
@@ -95,29 +129,6 @@
             line-height: 1.1;
             font-weight: normal;
             color: #dcfce7;
-        }
-
-        .header-circle-1 {
-            position: absolute;
-            top: -15px;
-            right: -10px;
-            width: 55px;
-            height: 55px;
-            background-color: rgba(255, 255, 255, 0.15);
-            /* Lingkaran putih transparan */
-            border-radius: 50%;
-            z-index: 1;
-        }
-
-        .header-circle-2 {
-            position: absolute;
-            top: 15px;
-            right: 25px;
-            width: 35px;
-            height: 35px;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            z-index: 1;
         }
 
         /* --- KONTEN --- */
@@ -139,9 +150,11 @@
             width: 20mm;
             height: 25mm;
             border: 1px solid #ccc;
+            /* Border lebih soft */
             background-color: #eee;
             object-fit: cover;
             border-radius: 4px;
+            /* Sudut foto sedikit melengkung */
             box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
         }
 
@@ -153,10 +166,9 @@
         }
 
         .row {
-            margin-bottom: 1.5px;
-            /* Spasi antar baris sedikit dilonggarkan agar lebih mudah dibaca */
+            margin-bottom: 1px;
             font-size: 9px;
-            line-height: 1.3;
+            line-height: 1.25;
             color: #1f2937;
         }
 
@@ -164,6 +176,31 @@
             font-weight: bold;
             display: inline-block;
             width: 48px;
+        }
+
+        /* --- FOOTER (TANDA TANGAN) --- */
+        .footer {
+            position: absolute;
+            top: 38mm;
+            right: 10px;
+            width: 45mm;
+            text-align: center;
+            font-size: 8px;
+            z-index: 10;
+        }
+
+        .footer p {
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .sign-area {
+            height: 8mm;
+        }
+
+        .sign-name {
+            font-weight: bold;
+            text-decoration: underline;
         }
 
         /* Watermark Background */
@@ -174,25 +211,23 @@
             transform: translate(-50%, -50%) rotate(-45deg);
             font-size: 40px;
             color: rgba(22, 101, 52, 0.05);
+            /* Sedikit lebih transparan agar tidak mengganggu bacaan */
             font-weight: bold;
             z-index: 0;
             pointer-events: none;
         }
 
-        /* --- QR CODE --- */
         .qr-area {
             position: absolute;
-            bottom: 8px;
-            right: 12px;
-            width: 15mm;
-            /* Diperbesar sedikit karena ruangnya sudah lega */
-            height: 15mm;
+            bottom: 5px;
+            right: 42mm;
+            width: 13mm;
+            height: 13mm;
             z-index: 20;
             background: white;
-            padding: 2.5px;
-            border-radius: 4px;
+            padding: 2px;
+            border-radius: 3px;
             border: 1px solid #e5e7eb;
-            box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
         }
 
         .qr-area svg {
@@ -213,12 +248,14 @@
             <div class="header">
                 <div class="header-circle-1"></div>
                 <div class="header-circle-2"></div>
+
                 <table>
                     <tr>
                         <td class="header-logo-col">
                             <img src="{{ public_path('logo/kud-logo.jpg') }}"
                                 style="height: 30px; width: auto; background: white; border-radius: 50%; padding: 1.5px;">
                         </td>
+
                         <td class="header-text-col">
                             <h2>KUD GAJAH MADA</h2>
                             <p>
@@ -226,6 +263,7 @@
                                 Provinsi Kalimantan Selatan, Kode pos 72161
                             </p>
                         </td>
+
                         <td class="header-spacer-col"></td>
                     </tr>
                 </table>
@@ -274,12 +312,14 @@
             <div class="qr-area">
                 <img src="data:image/svg+xml;base64, {{ $qrCode }}" style="width: 100%; height: 100%;">
             </div>
+
+            <div class="footer">
+                <p>Ketua KUD Gajah Mada</p>
+                <div class="sign-area"></div>
+                <p class="sign-name">{{ $namaKetua }}</p>
+            </div>
         </div>
     </div>
-
-    <p style="font-size: 10px; color: gray; margin-top: 15px;">
-        *Kartu ini sah sebagai identitas resmi anggota KUD Gajah Mada dan tervalidasi melalui sistem digital.
-    </p>
 
 </body>
 
