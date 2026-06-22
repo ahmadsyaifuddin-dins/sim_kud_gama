@@ -78,7 +78,6 @@
 
     <div id="fitur" class="py-16 bg-white">
         <div class="max-w-6xl mx-auto px-4 grid md:grid-cols-3 gap-8 text-center">
-
             <div
                 class="p-6 rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 group hover:border-pink-200">
                 <div
@@ -118,9 +117,11 @@
                 <h3 class="font-bold text-lg mb-2 text-gray-800">Transparan</h3>
                 <p class="text-sm text-gray-500">Pengelolaan data lahan dan administrasi yang terbuka dan akuntabel.</p>
             </div>
-
         </div>
     </div>
+
+    <!-- Memanggil file partial _visi_misi.blade.php -->
+    @include('partials._visi_misi')
 
     <footer class="bg-pink-900 text-white py-8 text-center">
         <p>&copy; {{ date('Y') }} KUD Gajah Mada. All rights reserved.</p>
