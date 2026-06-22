@@ -45,7 +45,7 @@
                 <th width="5%">No</th>
                 <th width="15%">No. Anggota</th>
                 <th width="25%">Nama Lengkap</th>
-                <th width="5%">L/P</th>
+                <th width="10%">Jenis Kelamin</th>
                 <th width="20%">Dusun</th>
                 <th width="15%">Tgl Bergabung</th>
                 <th width="15%">Status</th>
