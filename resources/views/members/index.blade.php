@@ -44,19 +44,26 @@
                                 </td>
 
                                 <td class="px-4 py-3">
-                                    <div class="flex items-center text-sm">
-                                        <div class="relative hidden w-12 h-12 mr-3 rounded-full md:block">
+                                    <div class="flex items-center text-sm min-w-[250px]">
+
+                                        <div class="relative hidden w-12 h-12 mr-3 rounded-full md:block shrink-0">
                                             <img class="object-cover w-full h-full rounded-full border-2 border-gray-200 shadow-sm"
                                                 src="{{ $member->foto ? asset($member->foto) : 'https://ui-avatars.com/api/?name=' . urlencode($member->nama_lengkap) . '&background=random' }}"
                                                 alt="{{ $member->nama_lengkap }}" loading="lazy" />
                                         </div>
-                                        <div>
-                                            <p class="font-bold text-gray-800 text-base">{{ $member->nama_lengkap }}</p>
-                                            <p class="text-xs text-gray-600 font-semibold mb-0.5"><i
+
+                                        <div class="flex-1">
+                                            <p class="font-bold text-gray-800 text-base whitespace-nowrap">
+                                                {{ $member->nama_lengkap }}
+                                            </p>
+
+                                            <p class="text-xs text-gray-600 font-semibold mb-0.5">
+                                                <i
                                                     class="fa-solid fa-id-card text-purple-400 mr-1"></i>{{ $member->nik }}
                                             </p>
-                                            <p class="text-[10px] text-gray-400"><i
-                                                    class="fa-regular fa-calendar-check mr-1"></i> Gabung:
+
+                                            <p class="text-[10px] text-gray-400 whitespace-nowrap">
+                                                <i class="fa-regular fa-calendar-check mr-1"></i> Gabung:
                                                 {{ \Carbon\Carbon::parse($member->tanggal_bergabung)->translatedFormat('d M Y') }}
                                             </p>
                                         </div>
