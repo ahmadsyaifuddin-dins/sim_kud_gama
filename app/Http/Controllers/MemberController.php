@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\MemberRequest;
 use App\Models\Member;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Crypt;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class MemberController extends Controller
@@ -155,17 +156,39 @@ class MemberController extends Controller
         return redirect()->route('members.index')->with('success', 'Anggota beserta seluruh berkas berhasil dihapus.');
     }
 
-    public function printCard(Member $member)
+    public function printCard(\App\Models\Member $member)
     {
+        // 1. Update status cetak
         $member->update([
             'status_cetak' => true,
             'tanggal_cetak' => now(),
         ]);
 
-        $validationUrl = route('members.check', $member->id);
+        // 2. Trik Obfuscation Ringan & Pendek (Pengganti Crypt yang terlalu panjang)
+        // Kita campur ID dengan string rahasia, lalu jadikan base64
+        $salt = 'KUDGAMA_';
+        $shortHash = base64_encode($salt.$member->id);
+        $validationUrl = route('members.verify', $shortHash);
 
-        $qrCode = base64_encode(QrCode::format('svg')->size(100)->errorCorrection('H')->generate($validationUrl));
+        // 3. Payload Teks Dipadatkan (Singkatan agar QR tidak terlalu rapat)
+        $qrPayload = "[ V A L I D ]\n"
+                   .'No  : '.$member->nomor_anggota."\n"
+                   .'Nama: '.strtoupper($member->nama_lengkap)."\n"
+                   .'NIK : '.$member->nik."\n"
+                   .'Gabung: '.\Carbon\Carbon::parse($member->tanggal_bergabung)->format('d-m-Y')."\n"
+                   ."\nLink Verifikasi:\n"
+                   .$validationUrl;
 
+        // 4. Generate QR Code
+        $qrCode = base64_encode(
+            QrCode::format('svg')
+                ->size(130)
+                ->margin(0)
+                ->errorCorrection('L') // Ubah ke L (Low 7%) agar kotak lebih besar dan mudah di-scan
+                ->generate($qrPayload)
+        );
+
+        // 5. Render ke PDF
         $pdf = Pdf::loadView('members.card_pdf', compact('member', 'qrCode'));
         $pdf->setPaper('A4', 'portrait');
 
@@ -182,5 +205,26 @@ class MemberController extends Controller
         $pdf->setPaper('A5', 'landscape');
 
         return $pdf->stream('Kwitansi-'.$member->nomor_anggota.'.pdf');
+    }
+
+    public function verifyQr($hash)
+    {
+        try {
+            // 1. Decode base64-nya
+            $decoded = base64_decode($hash);
+
+            // 2. Buang string rahasia "KUDGAMA_" untuk mendapatkan ID aslinya
+            $id = str_replace('KUDGAMA_', '', $decoded);
+
+            // 3. Cari data anggota (akan error 404 otomatis jika ID tidak ditemukan)
+            $member = \App\Models\Member::findOrFail($id);
+
+            // 4. Tampilkan View
+            return view('validation.result', compact('member'));
+
+        } catch (\Exception $e) {
+            // Jika ada yang iseng masukin link sembarangan
+            abort(404, 'QR Code Tidak Valid atau Telah Dimanipulasi!');
+        }
     }
 }

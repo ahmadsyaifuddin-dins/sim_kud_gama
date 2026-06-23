@@ -11,7 +11,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SavingController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\ValidationController;
 use Illuminate\Support\Facades\Route;
 
 // ROUTE PUBLIK (Tanpa Login)
@@ -52,7 +51,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/members/{member}/approve', [MemberController::class, 'approve'])->name('members.approve');
         Route::get('members/{member}/print-card', [MemberController::class, 'printCard'])->name('members.print_card');
         Route::get('members/{member}/print-receipt', [MemberController::class, 'printReceipt'])->name('members.print_receipt');
-        Route::get('/cek-anggota/{id}', [ValidationController::class, 'check'])->name('members.check');
+        Route::get('/cek-anggota/{hash}', [MemberController::class, 'verifyQr'])->name('members.verify');
 
         // Modul Iuran & Simpanan
         Route::resource('savings', SavingController::class);

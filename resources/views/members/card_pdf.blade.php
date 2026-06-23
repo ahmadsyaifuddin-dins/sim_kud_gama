@@ -208,7 +208,7 @@
         <span class="cut-text">Gunting di sepanjang garis putus-putus</span>
 
         <div class="card-container">
-            <div class="watermark">KUD GM</div>
+            <div class="watermark">KUD GAMA</div>
 
             <div class="header">
                 <div class="header-circle-1"></div>
