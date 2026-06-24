@@ -1,65 +1,83 @@
-<div>
+<div x-data="{
+    reportType: 'pendaftaran',
+    periode: 'semua'
+}" class="mb-8">
+
     <h3 class="mb-4 text-xl font-bold text-slate-800 border-b-2 border-slate-300 pb-2">
         <i class="fa-solid fa-vault text-yellow-500 mr-2"></i> B. Kelompok Keuangan & Simpanan
     </h3>
 
-    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-stretch">
-        <div
-            class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border-t-4 border-yellow-400 flex flex-col h-full">
-            <div class="flex items-center mb-4">
-                <h4 class="text-lg font-bold text-slate-700">4. Pemasukan Pendaftaran</h4>
-            </div>
-            <p class="text-xs text-slate-500 mb-4 flex-grow">Rekapitulasi pembayaran kewajiban pendaftaran awal anggota.
-            </p>
-            <form action="{{ route('reports.export') }}" method="GET" class="mt-auto">
-                <input type="hidden" name="report_type" value="pendaftaran">
-                <div class="grid grid-cols-2 gap-2 mb-1">
-                    <input type="date" name="start_date" class="block w-full text-xs border-slate-300 rounded-lg">
-                    <input type="date" name="end_date" class="block w-full text-xs border-slate-300 rounded-lg">
-                </div>
-                <p class="text-[10px] text-red-500 italic mb-3">*Kosongkan tanggal untuk mengunduh seluruh data.</p>
-                <button type="submit" name="action" value="pdf"
-                    class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">
-                    <i class="fa-solid fa-file-pdf"></i> Download PDF
-                </button>
-            </form>
-        </div>
+    <div class="p-6 bg-white rounded-xl shadow-sm border-t-4 border-yellow-400">
+        <form action="{{ route('reports.export') }}" method="GET" target="_blank">
 
-        <div
-            class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border-t-4 border-cyan-500 flex flex-col h-full">
-            <div class="flex items-center mb-4">
-                <h4 class="text-lg font-bold text-slate-700">5. Rekapitulasi Simpanan</h4>
-            </div>
-            <p class="text-xs text-slate-500 mb-4 flex-grow">Akumulasi simpanan pokok, wajib, dan sukarela per anggota
-                KUD.</p>
-            <form action="{{ route('reports.export') }}" method="GET" class="mt-auto">
-                <input type="hidden" name="report_type" value="rekap_simpanan">
-                <button type="submit" name="action" value="pdf"
-                    class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">
-                    <i class="fa-solid fa-file-pdf"></i> Download PDF
-                </button>
-            </form>
-        </div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- KIRI: PILIHAN REPORT -->
+                <div>
+                    <label class="block mb-2 text-sm font-bold text-slate-700">Pilih Jenis Laporan:</label>
+                    <select name="report_type" x-model="reportType" required
+                        class="block w-full text-sm border-slate-300 rounded-lg shadow-sm focus:border-yellow-500 focus:ring focus:ring-yellow-200">
+                        <option value="pendaftaran">5. Laporan Pemasukan Pendaftaran</option>
+                        <option value="rekap_simpanan">6. Laporan Rekapitulasi Simpanan</option>
+                        <option value="cashflow">7. Laporan Arus Kas (Cashflow)</option>
+                        <option value="simpanan_rinci">8. Laporan Transaksi Simpanan Rinci</option>
+                    </select>
 
-        <div
-            class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border-t-4 border-blue-800 flex flex-col h-full">
-            <div class="flex items-center mb-4">
-                <h4 class="text-lg font-bold text-slate-700">6. Arus Kas (Cashflow)</h4>
-            </div>
-            <p class="text-xs text-slate-500 mb-4 flex-grow">Laporan komprehensif pemasukan kas vs pengeluaran kas
-                operasional pinjaman.</p>
-            <form action="{{ route('reports.export') }}" method="GET" class="mt-auto">
-                <input type="hidden" name="report_type" value="cashflow">
-                <div class="grid grid-cols-2 gap-2 mb-1">
-                    <input type="date" name="start_date" class="block w-full text-xs border-slate-300 rounded-lg">
-                    <input type="date" name="end_date" class="block w-full text-xs border-slate-300 rounded-lg">
+                    <p class="mt-2 text-xs text-slate-500" x-show="reportType === 'pendaftaran'">
+                        *Menampilkan rekapitulasi pembayaran kewajiban pendaftaran awal anggota baru.
+                    </p>
+                    <p class="mt-2 text-xs text-slate-500" x-show="reportType === 'rekap_simpanan'">
+                        *Menampilkan akumulasi simpanan pokok, wajib, dan sukarela per anggota KUD aktif.
+                    </p>
+                    <p class="mt-2 text-xs text-slate-500" x-show="reportType === 'cashflow'">
+                        *Menampilkan laporan komprehensif pemasukan kas vs pengeluaran pinjaman.
+                    </p>
+                    <p class="mt-2 text-xs text-slate-500" x-show="reportType === 'simpanan_rinci'">
+                        *Menampilkan rincian histori penyetoran simpanan anggota per rentang tanggal.
+                    </p>
                 </div>
-                <p class="text-[10px] text-red-500 italic mb-3">*Kosongkan tanggal untuk mengunduh seluruh data.</p>
+
+                <!-- KANAN: FILTER DINAMIS -->
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <h4 class="mb-3 text-sm font-bold text-slate-700 border-b pb-1">Filter Data</h4>
+
+                    <!-- Pilihan Periode -->
+                    <div
+                        x-show="reportType === 'pendaftaran' || reportType === 'cashflow' || reportType === 'simpanan_rinci'">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Periode Transaksi</label>
+                        <select x-model="periode" class="block w-full text-sm border-slate-300 rounded-lg mb-2">
+                            <option value="semua">Cetak Semua Waktu</option>
+                            <option value="custom">Pilih Rentang Tanggal</option>
+                        </select>
+
+                        <div x-show="periode === 'custom'" class="grid grid-cols-2 gap-2 mt-2">
+                            <div>
+                                <label class="text-[10px] text-slate-500">Dari Tanggal</label>
+                                <input type="date" name="start_date"
+                                    class="block w-full text-xs border-slate-300 rounded-lg"
+                                    :required="periode === 'custom'">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-500">Sampai Tanggal</label>
+                                <input type="date" name="end_date"
+                                    class="block w-full text-xs border-slate-300 rounded-lg"
+                                    :required="periode === 'custom'">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div x-show="reportType === 'rekap_simpanan'" class="text-sm text-slate-500 italic py-2">
+                        Laporan ini bersifat akumulatif sampai saat ini. Tidak memerlukan filter tanggal.
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOMBOL CETAK (Target _blank sudah ada di form tag) -->
+            <div class="mt-6 flex justify-end gap-3 border-t pt-4">
                 <button type="submit" name="action" value="pdf"
-                    class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">
-                    <i class="fa-solid fa-file-pdf"></i> Download PDF
+                    class="flex items-center gap-2 px-6 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition shadow-md">
+                    <i class="fa-solid fa-print"></i> Cetak PDF
                 </button>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 </div>

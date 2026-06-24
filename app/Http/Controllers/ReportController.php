@@ -156,11 +156,26 @@ class ReportController extends Controller
             return $pdf->setPaper('A4', 'portrait')->stream('Laporan-Administrasi-KTA.pdf');
         }
 
+        // 4. LAPORAN TOTAL LUAS LAHAN PERTANIAN
+        if ($reportType == 'distribusi_lahan') {
+            $dataLahan = Member::where('status', 'active')
+                ->selectRaw('dusun, COUNT(id) as total_anggota, SUM(luasan_lahan) as total_hektar')
+                ->groupBy('dusun')
+                ->get();
+
+            $title = 'Laporan Total Luas Lahan Pertanian';
+            $subtitle = 'Rekapitulasi Luasan Hektar per Wilayah/Dusun';
+
+            $pdf = Pdf::loadView('reports.pdf_distribusi_lahan', compact('dataLahan', 'title', 'subtitle'));
+
+            return $pdf->setPaper('A4', 'portrait')->stream('Laporan-Distribusi-Lahan.pdf');
+        }
+
         // ====================================================================
         // B. KELOMPOK KEUANGAN & SIMPANAN
         // ====================================================================
 
-        // 4. LAPORAN PEMASUKAN PENDAFTARAN
+        // 5. LAPORAN PEMASUKAN PENDAFTARAN
         if ($reportType == 'pendaftaran' || $reportType == 'finance') {
             $query = Member::whereNotNull('file_bukti_bayar');
             if (! empty($request->start_date) && ! empty($request->end_date)) {
@@ -184,7 +199,7 @@ class ReportController extends Controller
             return $pdf->setPaper('A4', 'portrait')->stream('Laporan-Pemasukan-Pendaftaran.pdf');
         }
 
-        // 5. LAPORAN REKAPITULASI SIMPANAN
+        // 6. LAPORAN REKAPITULASI SIMPANAN
         if ($reportType == 'rekap_simpanan') {
             $members = Member::with(['savings'])->where('status', 'active')->get()->map(function ($member) {
                 $member->total_pokok = $member->savings->where('jenis_simpanan', 'pokok')->sum('jumlah');
@@ -203,7 +218,7 @@ class ReportController extends Controller
             return $pdf->setPaper('A4', 'landscape')->stream('Laporan-Simpanan.pdf');
         }
 
-        // 6. LAPORAN ARUS KAS (CASHFLOW)
+        // 7. LAPORAN ARUS KAS (CASHFLOW)
         if ($reportType == 'cashflow') {
             $startDate = $request->start_date ?? '2000-01-01';
             $endDate = $request->end_date ?? now()->format('Y-m-d');
@@ -228,11 +243,31 @@ class ReportController extends Controller
             return $pdf->setPaper('A4', 'portrait')->stream('Laporan-Arus-Kas.pdf');
         }
 
+        // 8. LAPORAN TRANSAKSI SIMPANAN RINCI
+        if ($reportType == 'simpanan_rinci') {
+            $query = \App\Models\Saving::with('member');
+
+            if (! empty($request->start_date) && ! empty($request->end_date)) {
+                $query->whereBetween('tanggal_bayar', [$request->start_date, $request->end_date]);
+                $periodeText = \Carbon\Carbon::parse($request->start_date)->translatedFormat('d M Y').' s/d '.\Carbon\Carbon::parse($request->end_date)->translatedFormat('d M Y');
+            } else {
+                $periodeText = 'Seluruh Data Transaksi';
+            }
+
+            $data = $query->orderBy('tanggal_bayar', 'asc')->get();
+            $title = 'Laporan Rincian Transaksi Simpanan';
+            $subtitle = "Periode Setor: $periodeText";
+
+            $pdf = Pdf::loadView('reports.pdf_simpanan_rinci', compact('data', 'title', 'subtitle'));
+
+            return $pdf->setPaper('A4', 'portrait')->stream('Laporan-Simpanan-Rinci.pdf');
+        }
+
         // ====================================================================
         // C. KELOMPOK PINJAMAN & KREDIT
         // ====================================================================
 
-        // 7. LAPORAN REKAP PINJAMAN
+        // 9. LAPORAN REKAP PINJAMAN
         if ($reportType == 'pinjaman_rekap') {
             $query = Pinjaman::with('member');
             if (! empty($request->status_pinjaman) && $request->status_pinjaman != 'semua') {
@@ -250,7 +285,7 @@ class ReportController extends Controller
             return $pdf->setPaper('A4', 'landscape')->stream('Laporan-Pinjaman.pdf');
         }
 
-        // 8. LAPORAN PINJAMAN BELUM LUNAS (TUNGGAKAN)
+        // 10. LAPORAN PINJAMAN BELUM LUNAS (TUNGGAKAN)
         if ($reportType == 'pinjaman_tunggakan') {
             $data = Pinjaman::with('member')->where('status', 'disetujui')->get();
             $title = 'Laporan Pinjaman Anggota Belum Lunas';
@@ -261,7 +296,7 @@ class ReportController extends Controller
             return $pdf->setPaper('A4', 'portrait')->stream('Laporan-Pinjaman-Belum-Lunas.pdf');
         }
 
-        // 9. LAPORAN KOLEKTIBILITAS (STATUS KELANCARAN)
+        // 11. LAPORAN KOLEKTIBILITAS (STATUS KELANCARAN)
         if ($reportType == 'kolektibilitas') {
             $pinjamans = Pinjaman::with(['member', 'angsuran'])->whereIn('status', ['disetujui', 'lunas'])->get()->map(function ($pinjaman) {
                 $pinjaman->total_terbayar = $pinjaman->angsuran->sum('jumlah_bayar');
@@ -286,7 +321,7 @@ class ReportController extends Controller
             return $pdf->setPaper('A4', 'landscape')->stream('Laporan-Kolektibilitas.pdf');
         }
 
-        // 10. LAPORAN ANGSURAN MASUK
+        // 12. LAPORAN ANGSURAN MASUK
         if ($reportType == 'angsuran_masuk') {
             $query = Angsuran::with('pinjaman.member');
             if ($request->filled('start_date') && $request->filled('end_date')) {
@@ -305,11 +340,32 @@ class ReportController extends Controller
             return $pdf->setPaper('A4', 'portrait')->stream('Laporan-Angsuran-Masuk.pdf');
         }
 
+        // 13. LAPORAN REALISASI PENCAIRAN DANA
+        if ($reportType == 'realisasi_pencairan') {
+            $query = \App\Models\Pinjaman::with('member')->whereIn('status', ['disetujui', 'lunas']);
+
+            if (! empty($request->start_date) && ! empty($request->end_date)) {
+                // Menggunakan updated_at karena itu waktu terakhir status berubah jadi disetujui (pencairan)
+                $query->whereBetween('updated_at', [$request->start_date.' 00:00:00', $request->end_date.' 23:59:59']);
+                $periodeText = \Carbon\Carbon::parse($request->start_date)->translatedFormat('d M Y').' s/d '.\Carbon\Carbon::parse($request->end_date)->translatedFormat('d M Y');
+            } else {
+                $periodeText = 'Seluruh Data Pencairan';
+            }
+
+            $data = $query->orderBy('updated_at', 'asc')->get();
+            $title = 'Laporan Realisasi Pencairan Dana Pinjaman';
+            $subtitle = "Periode Pencairan: $periodeText";
+
+            $pdf = Pdf::loadView('reports.pdf_realisasi_pencairan', compact('data', 'title', 'subtitle'));
+
+            return $pdf->setPaper('A4', 'landscape')->stream('Laporan-Realisasi-Pencairan.pdf');
+        }
+
         // ====================================================================
         // D. KELOMPOK SISTEM & MANAJEMEN
         // ====================================================================
 
-        // 11. LAPORAN PENGURUS
+        // 14. LAPORAN PENGURUS
         if ($reportType == 'pengurus') {
             $data = Management::where('is_active', 1)->get();
             $title = 'Daftar Susunan Pengurus KUD Gajah Mada';
@@ -320,7 +376,7 @@ class ReportController extends Controller
             return $pdf->setPaper('A4', 'landscape')->stream('Laporan-Pengurus.pdf');
         }
 
-        // 12. LAPORAN HAK AKSES PENGGUNA
+        // 15. LAPORAN HAK AKSES PENGGUNA
         if ($reportType == 'pengguna') {
             $users = \App\Models\User::all();
             $title = 'Laporan Data Hak Akses Pengguna';

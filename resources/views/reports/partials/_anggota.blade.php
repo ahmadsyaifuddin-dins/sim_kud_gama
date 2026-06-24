@@ -11,6 +11,7 @@
         <form action="{{ route('reports.export') }}" method="GET" target="_blank">
 
             <div class="grid md:grid-cols-2 gap-6">
+                <!-- KIRI: PILIHAN REPORT -->
                 <div>
                     <label class="block mb-2 text-sm font-bold text-slate-700">Pilih Jenis Laporan:</label>
                     <select name="report_type" x-model="reportType" required
@@ -18,6 +19,7 @@
                         <option value="anggota_terpadu">1. Laporan Data Anggota Terpadu</option>
                         <option value="demografi">2. Laporan Demografi & Potensi Lahan</option>
                         <option value="kta">3. Laporan Administrasi & Status KTA</option>
+                        <option value="distribusi_lahan">4. Laporan Total Luas Lahan Pertanian</option>
                     </select>
 
                     <p class="mt-2 text-xs text-slate-500" x-show="reportType === 'anggota_terpadu'">
@@ -29,8 +31,12 @@
                     <p class="mt-2 text-xs text-slate-500" x-show="reportType === 'kta'">
                         *Menampilkan status keaktifan anggota dan progres pencetakan Kartu Tanda Anggota.
                     </p>
+                    <p class="mt-2 text-xs text-slate-500" x-show="reportType === 'distribusi_lahan'">
+                        *Menampilkan rekapitulasi total luasan lahan pertanian per wilayah/dusun.
+                    </p>
                 </div>
 
+                <!-- KANAN: FILTER DINAMIS -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
                     <h4 class="mb-3 text-sm font-bold text-slate-700 border-b pb-1">Filter Data</h4>
 
@@ -87,8 +93,10 @@
                         </div>
                     </div>
 
-                    <div x-show="reportType === 'demografi'" class="text-sm text-slate-500 italic py-2">
-                        Laporan ini tidak memerlukan filter dan akan mencetak seluruh data aktif.
+                    <!-- Perhatikan perubahan di baris ini: Menambahkan kondisi untuk distribusi_lahan -->
+                    <div x-show="reportType === 'demografi' || reportType === 'distribusi_lahan'"
+                        class="text-sm text-slate-500 italic py-2">
+                        Laporan ini bersifat akumulatif analitik. Tidak memerlukan filter tanggal/wilayah.
                     </div>
                 </div>
             </div>
