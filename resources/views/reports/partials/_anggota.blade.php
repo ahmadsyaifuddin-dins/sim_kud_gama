@@ -1,82 +1,109 @@
-<div>
+<div x-data="{
+    reportType: 'anggota_terpadu',
+    periode: 'semua'
+}" class="mb-8">
+
     <h3 class="mb-4 text-xl font-bold text-slate-800 border-b-2 border-slate-300 pb-2">
         <i class="fa-solid fa-users text-purple-600 mr-2"></i> A. Kelompok Data Anggota & Administrasi
     </h3>
 
-    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-stretch">
-        <div
-            class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border-t-4 border-purple-500 flex flex-col h-full">
-            <div class="flex items-center mb-4">
-                <h4 class="text-lg font-bold text-slate-700">1. Data Anggota Terpadu</h4>
-            </div>
-            <p class="text-xs text-slate-500 mb-4 flex-grow">Rekapitulasi dinamis berdasarkan wilayah dan periode daftar.
-            </p>
-            <form action="{{ route('reports.export') }}" method="GET" class="mt-auto">
-                <input type="hidden" name="report_type" value="anggota_terpadu">
-                <select name="dusun"
-                    class="block w-full mb-2 text-sm border-slate-300 rounded-lg shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200">
-                    <option value="semua">-- Semua Wilayah (Dusun) --</option>
-                    @foreach ($dusunList as $dusun)
-                        <option value="{{ $dusun }}">{{ $dusun }}</option>
-                    @endforeach
-                </select>
-                <div class="grid grid-cols-2 gap-2 mb-1">
-                    <input type="date" name="start_date" class="block w-full text-xs border-slate-300 rounded-lg"
-                        title="Dari Tanggal">
-                    <input type="date" name="end_date" class="block w-full text-xs border-slate-300 rounded-lg"
-                        title="Sampai Tanggal">
+    <div class="p-6 bg-white rounded-xl shadow-sm border-t-4 border-purple-500">
+        <form action="{{ route('reports.export') }}" method="GET" target="_blank">
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block mb-2 text-sm font-bold text-slate-700">Pilih Jenis Laporan:</label>
+                    <select name="report_type" x-model="reportType" required
+                        class="block w-full text-sm border-slate-300 rounded-lg shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200">
+                        <option value="anggota_terpadu">1. Laporan Data Anggota Terpadu</option>
+                        <option value="demografi">2. Laporan Demografi & Potensi Lahan</option>
+                        <option value="kta">3. Laporan Administrasi & Status KTA</option>
+                    </select>
+
+                    <p class="mt-2 text-xs text-slate-500" x-show="reportType === 'anggota_terpadu'">
+                        *Menampilkan rekapitulasi data anggota beserta detail lahan.
+                    </p>
+                    <p class="mt-2 text-xs text-slate-500" x-show="reportType === 'demografi'">
+                        *Menampilkan data usia, pekerjaan, dan akumulasi total luasan lahan pertanian.
+                    </p>
+                    <p class="mt-2 text-xs text-slate-500" x-show="reportType === 'kta'">
+                        *Menampilkan status keaktifan anggota dan progres pencetakan Kartu Tanda Anggota.
+                    </p>
                 </div>
-                <p class="text-[10px] text-red-500 italic mb-3">*Kosongkan tanggal untuk mengunduh seluruh data.</p>
-                <button type="submit" name="action" value="pdf"
-                    class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">
-                    <i class="fa-solid fa-file-pdf"></i> Download PDF
-                </button>
-            </form>
-        </div>
 
-        <div
-            class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border-t-4 border-blue-500 flex flex-col h-full">
-            <div class="flex items-center mb-4">
-                <h4 class="text-lg font-bold text-slate-700">2. Demografi & Potensi</h4>
-            </div>
-            <p class="text-xs text-slate-500 mb-4 flex-grow">Laporan usia, pekerjaan, dan akumulasi luasan lahan
-                pertanian anggota KUD.</p>
-            <form action="{{ route('reports.export') }}" method="GET" class="mt-auto">
-                <input type="hidden" name="report_type" value="demografi">
-                <button type="submit" name="action" value="pdf"
-                    class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">
-                    <i class="fa-solid fa-file-pdf"></i> Download PDF
-                </button>
-            </form>
-        </div>
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <h4 class="mb-3 text-sm font-bold text-slate-700 border-b pb-1">Filter Data</h4>
 
-        <div
-            class="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition border-t-4 border-teal-500 flex flex-col h-full">
-            <div class="flex items-center mb-4">
-                <h4 class="text-lg font-bold text-slate-700">3. Administrasi KTA</h4>
+                    <div x-show="reportType === 'anggota_terpadu'" class="mb-3">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Wilayah / Dusun</label>
+                        <select name="dusun" class="block w-full text-sm border-slate-300 rounded-lg">
+                            <option value="semua">-- Semua Wilayah (Dusun) --</option>
+                            @foreach ($dusunList as $dusun)
+                                <option value="{{ $dusun }}">{{ $dusun }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div x-show="reportType === 'kta'" class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Status Keanggotaan</label>
+                            <select name="status" class="block w-full text-sm border-slate-300 rounded-lg">
+                                <option value="semua">-- Semua Status --</option>
+                                <option value="active">Aktif</option>
+                                <option value="inactive">Pasif</option>
+                                <option value="stopped">Keluar / Berhenti</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Status Cetak KTA</label>
+                            <select name="status_cetak" class="block w-full text-sm border-slate-300 rounded-lg">
+                                <option value="semua">-- Semua Status Cetak --</option>
+                                <option value="belum">Belum Dicetak</option>
+                                <option value="sudah">Sudah Dicetak</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div x-show="reportType === 'anggota_terpadu'" class="mt-3">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Periode Pendaftaran</label>
+                        <select x-model="periode" class="block w-full text-sm border-slate-300 rounded-lg mb-2">
+                            <option value="semua">Cetak Semua Waktu</option>
+                            <option value="custom">Pilih Rentang Tanggal</option>
+                        </select>
+
+                        <div x-show="periode === 'custom'" class="grid grid-cols-2 gap-2 mt-2">
+                            <div>
+                                <label class="text-[10px] text-slate-500">Dari Tanggal</label>
+                                <input type="date" name="start_date"
+                                    class="block w-full text-xs border-slate-300 rounded-lg"
+                                    :required="periode === 'custom'">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-500">Sampai Tanggal</label>
+                                <input type="date" name="end_date"
+                                    class="block w-full text-xs border-slate-300 rounded-lg"
+                                    :required="periode === 'custom'">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div x-show="reportType === 'demografi'" class="text-sm text-slate-500 italic py-2">
+                        Laporan ini tidak memerlukan filter dan akan mencetak seluruh data aktif.
+                    </div>
+                </div>
             </div>
-            <p class="text-xs text-slate-500 mb-4 flex-grow">Monitoring status keanggotaan dan progres pencetakan Kartu
-                Tanda Anggota.</p>
-            <form action="{{ route('reports.export') }}" method="GET" class="mt-auto">
-                <input type="hidden" name="report_type" value="kta">
-                <select name="status"
-                    class="block w-full mb-2 text-sm border-slate-300 rounded-lg shadow-sm focus:border-teal-500 focus:ring focus:ring-teal-200">
-                    <option value="semua">-- Semua Status --</option>
-                    <option value="active">Aktif</option>
-                    <option value="inactive">Pasif</option>
-                    <option value="stopped">Keluar</option>
-                </select>
-                <select name="status_cetak"
-                    class="block w-full mb-3 text-sm border-slate-300 rounded-lg shadow-sm focus:border-teal-500 focus:ring focus:ring-teal-200">
-                    <option value="semua">-- Semua Status Cetak --</option>
-                    <option value="belum">Belum Dicetak</option>
-                    <option value="sudah">Sudah Dicetak</option>
-                </select>
-                <button type="submit" name="action" value="pdf"
-                    class="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">
-                    <i class="fa-solid fa-file-pdf"></i> Download PDF
+
+            <div class="mt-6 flex justify-end gap-3 border-t pt-4">
+                <button type="submit" name="action" value="excel"
+                    class="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-emerald-700 bg-emerald-100 border border-emerald-300 rounded-lg hover:bg-emerald-200 transition">
+                    <i class="fa-solid fa-file-excel"></i> Export Excel
                 </button>
-            </form>
-        </div>
+                <button type="submit" name="action" value="pdf"
+                    class="flex items-center gap-2 px-6 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition shadow-md">
+                    <i class="fa-solid fa-print"></i> Cetak PDF
+                </button>
+            </div>
+
+        </form>
     </div>
 </div>
