@@ -98,7 +98,9 @@
     <div>
         <x-forms.label value="Luasan Lahan Sawit" required="true" />
         <div class="relative mt-1">
-            <input type="number" step="0.01" name="luasan_lahan" value="{{ old('luasan_lahan') }}" required
+            {{-- PERBAIKAN: Tambahkan $member->luasan_lahan ?? '' di value --}}
+            <input type="number" step="0.01" name="luasan_lahan" 
+                value="{{ old('luasan_lahan', $member->luasan_lahan ?? '') }}" required
                 class="block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-pink-500 focus:ring-pink-500 pr-10"
                 placeholder="Contoh: 2.5">
             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -106,7 +108,6 @@
             </div>
         </div>
         
-        {{-- Keterangan Helper di-break agar rapi --}}
         <div class="text-[10px] text-gray-500 mt-1.5 font-medium leading-relaxed">
             <div class="flex items-start gap-1">
                 <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
@@ -124,10 +125,17 @@
     {{-- No HP / WA --}}
     <div>
         <x-forms.label value="No HP / WA" required="true" />
-        <x-forms.numeric-input name="no_hp" mode="no_hp" required="true" placeholder="Awalan 08xxx (Misal: 081234...)" />
+        {{-- PERBAIKAN: Tambahkan :value="$member->no_hp ?? ''" --}}
+        <x-forms.numeric-input 
+            name="no_hp" 
+            mode="no_hp" 
+            required="true" 
+            placeholder="Awalan 08xxx (Misal: 081234...)" 
+            :value="$member->no_hp ?? ''" 
+        />
         <p class="text-[10px] text-gray-500 mt-1.5 font-medium">
             <i class="fa-solid fa-circle-info text-blue-500 mr-1"></i>
-            Pastikan nomor aktif di WhatsApp untuk <b>notifikasi</b> dan dimulai dengan awalan <strong>08xxx</strong>.
+            Pastikan nomor aktif dan dimulai dengan awalan <strong>08xxx</strong>.
         </p>
         @error('no_hp') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
     </div>
