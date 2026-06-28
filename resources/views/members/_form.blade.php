@@ -143,7 +143,13 @@
     <div class="sm:col-span-2">
         <x-forms.label value="Alamat Lengkap (Jalan/RT/RW)" required="true" />
         <textarea name="alamat_lengkap" rows="3" required
-            class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:border-purple-400 focus:ring focus:ring-purple-200">{{ old('alamat_lengkap', $member->alamat_lengkap ?? '') }}</textarea>
+            class="block w-full mt-1 text-sm border-gray-300 focus:border-pink-500 focus:ring-pink-500 rounded-md shadow-sm">{{ old('alamat_lengkap', $member->alamat_lengkap ?? '') }}</textarea>
+        
+        {{-- Keterangan Helper untuk Alamat --}}
+        <p class="text-[10px] text-gray-500 mt-1.5 font-medium">
+            <i class="fa-solid fa-circle-info text-blue-500 mr-1"></i>
+            Masukkan alamat <strong>domisili / tempat tinggal</strong> sesuai KTP, bukan alamat lokasi lahan sawit.
+        </p>
     </div>
 
     <div>
@@ -214,9 +220,14 @@
 
 {{-- SECTION: BERKAS PERSYARATAN --}}
 <hr class="my-8 border-gray-300 border-dashed">
-<div class="flex items-center gap-2 mb-4">
-    <i class="fa-solid fa-folder-open text-purple-600 text-xl"></i>
-    <h3 class="text-lg font-bold text-gray-800">Berkas Persyaratan (Lampiran)</h3>
+<div class="flex items-start gap-3 mb-4">
+    <i class="fa-solid fa-folder-open text-pink-600 text-2xl mt-0.5"></i>
+    <div>
+        <h3 class="text-lg font-bold text-gray-800">Berkas Persyaratan Pendaftaran</h3>
+        <p class="text-xs text-gray-500 font-medium mt-1">
+            Dokumen wajib yang diserahkan saat pendaftaran calon anggota. Sistem akan menyimpannya sebagai arsip digital.
+        </p>
+    </div>
 </div>
 
 <div class="grid grid-cols-1 gap-6 sm:grid-cols-3 bg-gray-50 p-5 rounded-xl border border-gray-200">

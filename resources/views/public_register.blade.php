@@ -85,12 +85,19 @@
                 <h3 class="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">2. Alamat & Lahan</h3>
                 <div class="grid md:grid-cols-2 gap-6">
                     
-                    <div class="md:col-span-2">
-                        <x-forms.label value="Alamat Lengkap (Jalan/RT/RW)" required="true" />
-                        <textarea name="alamat_lengkap" rows="3" required
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 border p-2 text-sm">{{ old('alamat_lengkap') }}</textarea>
-                        @error('alamat_lengkap') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
+                <div class="md:col-span-2">
+                    <x-forms.label value="Alamat Lengkap (Jalan/RT/RW)" required="true" />
+                    <textarea name="alamat_lengkap" rows="3" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 border p-2 text-sm">{{ old('alamat_lengkap') }}</textarea>
+                    
+                    {{-- Keterangan Helper untuk Alamat Domisili --}}
+                    <p class="text-[10px] text-gray-500 mt-1.5 font-medium">
+                        <i class="fa-solid fa-circle-info text-blue-500 mr-1"></i>
+                        Masukkan alamat <strong>domisili / tempat tinggal</strong> saat ini sesuai KTP, bukan alamat lokasi lahan sawit.
+                    </p>
+                    
+                    @error('alamat_lengkap') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
 
                     <div>
                         <x-forms.label value="Dusun" required="true" />
@@ -149,15 +156,22 @@
 
             {{-- SECTION 3: UPLOAD BERKAS --}}
             <div>
-                <h3 class="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">3. Upload Berkas Persyaratan (Wajib)</h3>
-                <div class="grid md:grid-cols-2 gap-6 bg-pink-50 p-5 rounded-xl border border-pink-100">
-                    
-                    <div>
-                        <x-forms.label value="Pas Foto (JPG/PNG)" required="true" />
-                        <x-forms.upload-file name="foto" accept="image/*" required />
-                        <p class="text-[10px] text-gray-500 mt-1">Maksimal 2MB. Digunakan untuk Kartu Anggota.</p>
-                        @error('foto') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
+        {{-- Wrapper Header Section: Garis pemisah diletakkan di sini agar membungkus judul dan teks --}}
+        <div class="border-b border-gray-200 pb-3 mb-5">
+            <h3 class="text-lg font-semibold text-gray-800">3. Upload Berkas Persyaratan (Wajib)</h3>
+            <p class="text-xs text-gray-500 font-medium mt-1.5">
+                Silakan unggah dokumen berikut sebagai syarat pendaftaran <strong class="text-pink-600">Calon Anggota Baru</strong>. Berkas akan diverifikasi oleh pengurus KUD Gajah Mada.
+            </p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 gap-6 bg-pink-50 p-5 rounded-xl border border-pink-100">
+            
+            <div>
+                <x-forms.label value="Pas Foto (JPG/PNG)" required="true" />
+                <x-forms.upload-file name="foto" accept="image/*" required />
+                <p class="text-[10px] text-gray-500 mt-1">Maksimal 2MB. Digunakan untuk Kartu Anggota.</p>
+                @error('foto') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+            </div>
 
                     <div>
                         <x-forms.label value="Scan / Foto KTP" required="true" />
