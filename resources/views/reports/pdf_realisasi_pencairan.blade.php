@@ -1,95 +1,52 @@
-<!DOCTYPE html>
-<html>
+@extends('reports.layout_pdf')
 
-<head>
-    <title>{{ $title }}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 11px;
-        }
+@section('content')
+<style>
+    /* Identitas warna pink khas laporan realisasi pencairan */
+    .data-table th { background-color: #FFAFAF !important; }
+</style>
 
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        .data-table th,
-        .data-table td {
-            border: 1px solid #000;
-            padding: 5px;
-            text-align: left;
-            vertical-align: middle;
-        }
-
-        .data-table th {
-            background-color: #fce7f3;
-            /* Pink muda */
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .text-right {
-            text-align: right;
-        }
-
-        .bg-gray {
-            background-color: #f3f4f6;
-            font-weight: bold;
-        }
-    </style>
-</head>
-
-<body>
-    @include('reports._header')
-
-    <h3 class="text-center" style="margin-bottom: 5px;">{{ $title }}</h3>
-    <p class="text-center" style="margin-top: 0; margin-bottom: 20px; font-style: italic;">{{ $subtitle }}</p>
-
-    <table class="data-table">
-        <thead>
+<table class="data-table">
+    <thead>
+        <tr>
+            <th width="5%">No</th>
+            <th width="15%">Tanggal Cair</th>
+            <th width="25%">Nama Peminjam</th>
+            <th width="25%">Keperluan Kredit</th>
+            <th width="10%">Tenor</th>
+            <th width="20%">Nominal Cair (Rp)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @php $totalPencairan = 0; @endphp
+        
+        @forelse($data as $index => $item)
+            @php $totalPencairan += $item->jumlah_pinjaman; @endphp
             <tr>
-                <th width="5%">No</th>
-                <th width="15%">Tanggal Cair</th>
-                <th width="25%">Nama Peminjam</th>
-                <th width="25%">Keperluan Kredit</th>
-                <th width="10%">Tenor</th>
-                <th width="20%">Nominal Cair (Rp)</th>
+                <td class="text-center">{{ $index + 1 }}</td>
+                <td class="text-center">
+                    {{ $item->updated_at ? \Carbon\Carbon::parse($item->updated_at)->translatedFormat('d M Y') : '-' }}
+                </td>
+                <td>
+                    {{ $item->member->nama_lengkap ?? 'Anggota Dihapus' }}
+                </td>
+                <td>{{ $item->keperluan }}</td>
+                <td class="text-center">{{ $item->lama_angsuran }} Bln</td>
+                <td class="text-right">{{ number_format($item->jumlah_pinjaman, 0, ',', '.') }}</td>
             </tr>
-        </thead>
-        <tbody>
-            @php $totalPencairan = 0; @endphp
-            @forelse($data as $index => $item)
-                @php $totalPencairan += $item->jumlah_pinjaman; @endphp
-                <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
-                    <td class="text-center">{{ \Carbon\Carbon::parse($item->updated_at)->format('d/m/Y') }}</td>
-                    <td>{{ $item->member->nama_lengkap ?? 'Anggota Dihapus' }}</td>
-                    <td>{{ $item->keperluan }}</td>
-                    <td class="text-center">{{ $item->lama_angsuran }} Bln</td>
-                    <td class="text-right">{{ number_format($item->jumlah_pinjaman, 0, ',', '.') }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="6" class="text-center">Tidak ada realisasi pencairan pinjaman pada periode ini.</td>
-                </tr>
-            @endforelse
-
-            @if (count($data) > 0)
-                <tr class="bg-gray">
-                    <td colspan="5" class="text-right">TOTAL UANG KELUAR :</td>
-                    <td class="text-right">Rp {{ number_format($totalPencairan, 0, ',', '.') }}</td>
-                </tr>
-            @endif
-        </tbody>
-    </table>
-
-    @include('reports._signature', ['type' => 'keuangan'])
-</body>
-
-</html>
+        @empty
+            <tr>
+                <td colspan="6" class="text-center" style="padding: 10px;">
+                    <em>Tidak ada realisasi pencairan pinjaman pada periode ini.</em>
+                </td>
+            </tr>
+        @endforelse
+    </tbody>
+    <tfoot>
+        <tr style="background-color: #f3f4f6; font-weight: bold;">
+            <td colspan="5" class="text-right" style="padding-right: 10px;">TOTAL UANG KELUAR :</td>
+            <td class="text-right">Rp {{ number_format($totalPencairan, 0, ',', '.') }}</td>
+        </tr>
+    </tfoot>
+</table>
+@endsection

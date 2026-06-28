@@ -95,5 +95,5 @@
         <p>{{ $subtitle }}</p>
     @endif
 
-    <p>Dicetak pada: {{ now()->translatedFormat('d F Y') }}</p>
+    <!-- <p>Dicetak pada: {{ now()->translatedFormat('d F Y') }}</p> -->
 </div>

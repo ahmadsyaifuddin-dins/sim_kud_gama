@@ -11,7 +11,6 @@
         <form action="{{ route('reports.export') }}" method="GET" target="_blank">
 
             <div class="grid md:grid-cols-2 gap-6">
-                <!-- KIRI: PILIHAN REPORT -->
                 <div>
                     <label class="block mb-2 text-sm font-bold text-slate-700">Pilih Jenis Laporan:</label>
                     <select name="report_type" x-model="reportType" required
@@ -36,7 +35,6 @@
                     </p>
                 </div>
 
-                <!-- KANAN: FILTER DINAMIS -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
                     <h4 class="mb-3 text-sm font-bold text-slate-700 border-b pb-1">Filter Data</h4>
 
@@ -72,7 +70,7 @@
 
                     <div x-show="reportType === 'anggota_terpadu'" class="mt-3">
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Periode Pendaftaran</label>
-                        <select x-model="periode" class="block w-full text-sm border-slate-300 rounded-lg mb-2">
+                        <select x-model="periode" name="filter_periode" class="block w-full text-sm border-slate-300 rounded-lg mb-2">
                             <option value="semua">Cetak Semua Waktu</option>
                             <option value="custom">Pilih Rentang Tanggal</option>
                         </select>
@@ -82,18 +80,19 @@
                                 <label class="text-[10px] text-slate-500">Dari Tanggal</label>
                                 <input type="date" name="start_date"
                                     class="block w-full text-xs border-slate-300 rounded-lg"
-                                    :required="periode === 'custom'">
+                                    :required="periode === 'custom'"
+                                    :disabled="periode !== 'custom'">
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-500">Sampai Tanggal</label>
                                 <input type="date" name="end_date"
                                     class="block w-full text-xs border-slate-300 rounded-lg"
-                                    :required="periode === 'custom'">
+                                    :required="periode === 'custom'"
+                                    :disabled="periode !== 'custom'">
                             </div>
                         </div>
                     </div>
 
-                    <!-- Perhatikan perubahan di baris ini: Menambahkan kondisi untuk distribusi_lahan -->
                     <div x-show="reportType === 'demografi' || reportType === 'distribusi_lahan'"
                         class="text-sm text-slate-500 italic py-2">
                         Laporan ini bersifat akumulatif analitik. Tidak memerlukan filter tanggal/wilayah.

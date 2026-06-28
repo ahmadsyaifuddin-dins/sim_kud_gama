@@ -1,73 +1,40 @@
-<!DOCTYPE html>
-<html>
+@extends('reports.layout_pdf')
 
-<head>
-    <title>{{ $title }}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 11px;
-        }
+@section('content')
+<style>
+    /* Identitas warna slate untuk data pengguna */
+    .data-table th { background-color: #e2e8f0 !important; }
+</style>
 
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        .data-table th,
-        .data-table td {
-            border: 1px solid #000;
-            padding: 5px;
-            text-align: left;
-            vertical-align: middle;
-        }
-
-        .data-table th {
-            background-color: #e2e8f0;
-            /* slate-200 */
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-    </style>
-</head>
-
-<body>
-    @include('reports._header')
-
-    <table class="data-table">
-        <thead>
+<table class="data-table">
+    <thead>
+        <tr>
+            <th width="5%">No</th>
+            <th width="25%">Nama Pengguna</th>
+            <th width="30%">Alamat Email</th>
+            <th width="20%">Hak Akses (Role)</th>
+            <th width="20%">Tgl Pembuatan</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{-- Menggunakan $data sesuai standar arsitektur Trait --}}
+        @forelse($data as $index => $item)
             <tr>
-                <th width="5%">No</th>
-                <th width="25%">Nama Pengguna</th>
-                <th width="30%">Alamat Email</th>
-                <th width="20%">Hak Akses (Role)</th>
-                <th width="20%">Tgl Pembuatan Akun</th>
+                <td class="text-center">{{ $index + 1 }}</td>
+                <td>{{ $item->name }}</td>
+                <td>{{ $item->email }}</td>
+                <td class="text-center">{{ strtoupper($item->role) }}</td>
+                <td class="text-center">
+                    {{ $item->created_at ? $item->created_at->translatedFormat('d M Y H:i') : '-' }}
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            @forelse($users as $index => $item)
-                <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
-                    <td>{{ $item->name }}</td>
-                    <td>{{ $item->email }}</td>
-                    <td class="text-center">{{ strtoupper($item->role) }}</td>
-                    <td class="text-center">
-                        {{ $item->created_at ? $item->created_at->translatedFormat('d M Y H:i') : '-' }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="5" class="text-center">Data pengguna tidak ditemukan.</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
-
-    @include('reports._signature')
-</body>
-
-</html>
+        @empty
+            <tr>
+                <td colspan="5" class="text-center" style="padding: 10px;">
+                    <em>Data pengguna tidak ditemukan.</em>
+                </td>
+            </tr>
+        @endforelse
+    </tbody>
+</table>
+@endsection

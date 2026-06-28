@@ -2,392 +2,92 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\MemberExport;
-use App\Models\Angsuran;
-use App\Models\Management;
-use App\Models\Member;
-use App\Models\Pinjaman;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use App\Models\Member;
+use App\Exports\MemberExport;
 use Maatwebsite\Excel\Facades\Excel;
+
+// Mengimpor Traits yang sudah kita buat sebelumnya
+use App\Traits\Reports\MemberReportsTrait;
+use App\Traits\Reports\FinanceReportsTrait;
+use App\Traits\Reports\LoanReportsTrait;
+use App\Traits\Reports\SystemReportsTrait;
 
 class ReportController extends Controller
 {
+    /**
+     * Menggunakan Traits untuk menjaga Controller tetap ramping.
+     * Prinsip DRY (Don't Repeat Yourself) dan SRP (Single Responsibility Principle)
+     * sangat terjaga dengan pemisahan domain laporan seperti ini.
+     */
+    use MemberReportsTrait, FinanceReportsTrait, LoanReportsTrait, SystemReportsTrait;
+
+    /**
+     * Menampilkan halaman antarmuka Laporan.
+     */
     public function index()
     {
-        $dusunList = Member::select('dusun')->distinct()->pluck('dusun');
-
+        // Mengambil daftar dusun yang unik, memastikan tidak ada yang null atau duplikat
+        $dusunList = Member::select('dusun')->whereNotNull('dusun')->distinct()->pluck('dusun');
+        
         return view('reports.index', compact('dusunList'));
     }
 
+    /**
+     * Memproses rute export dan bertindak sebagai "Traffic Controller".
+     * Tidak ada logika bisnis di sini, hanya mengarahkan request ke Trait/Class yang tepat.
+     */
     public function export(Request $request)
     {
-        $filters = $this->getFilters($request);
+        $type = $request->report_type;
 
+        // 1. PENANGANAN EXPORT PDF (Menggunakan Match Expression PHP 8 yang lebih bersih dari Switch-Case)
+        if ($request->action == 'pdf') {
+            return match (true) {
+                // A. Kelompok Anggota & Administrasi
+                in_array($type, ['anggota_terpadu', 'demografi', 'kta', 'distribusi_lahan']) 
+                    => $this->generateMemberReport($request, $type),
+                
+                // B. Kelompok Keuangan & Simpanan
+                in_array($type, ['pendaftaran', 'rekap_simpanan', 'cashflow', 'simpanan_rinci']) 
+                    => $this->generateFinanceReport($request, $type),
+                
+                // C. Kelompok Pinjaman & Kredit
+                in_array($type, ['pinjaman_rekap', 'pinjaman_tunggakan', 'kolektibilitas', 'angsuran_masuk', 'realisasi_pencairan']) 
+                    => $this->generateLoanReport($request, $type),
+                
+                // D. Kelompok Sistem & Data Master
+                in_array($type, ['pengurus', 'pengguna']) 
+                    => $this->generateSystemReport($request, $type),
+                
+                // Fallback / Keamanan
+                default => back()->with('error', 'Jenis Laporan PDF tidak dikenali atau terjadi kesalahan parameter.')
+            };
+        }
+
+        // 2. PENANGANAN EXPORT EXCEL
         if ($request->action == 'excel') {
-            return $this->downloadExcel($filters);
-        } elseif ($request->action == 'pdf') {
-            return $this->downloadPdf($request, $filters);
+            return $this->downloadExcel($request);
         }
 
-        return back()->with('error', 'Format laporan tidak dikenali.');
+        return back()->with('error', 'Aksi tidak valid. Silakan pilih tombol Cetak PDF atau Export Excel.');
     }
 
-    private function getFilters(Request $request)
+    /**
+     * Logika terpusat untuk mengunduh Excel.
+     */
+    private function downloadExcel(Request $request)
     {
-        return [
-            'report_type' => $request->report_type ?? 'general',
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'dusun' => $request->dusun,
-            'status_cetak' => $request->status_cetak,
-            'status' => $request->status,
-        ];
-    }
-
-    private function getFilteredQuery(array $filters)
-    {
-        $query = Member::query();
-
-        // 1. LOGIKA KEUANGAN (Tetap sama)
-        if ($filters['report_type'] == 'finance') {
-            $query->whereNotNull('file_bukti_bayar');
-            if ($filters['start_date'] && $filters['end_date']) {
-                $query->whereBetween('tanggal_bayar', [$filters['start_date'], $filters['end_date']]);
-            }
-        }
-
-        // 2. LOGIKA LAPORAN STATUS (BARU)
-        elseif ($filters['report_type'] == 'status') {
-            // Jika user memilih filter status spesifik (bukan 'semua')
-            if (! empty($filters['status']) && $filters['status'] != 'semua') {
-                $query->where('status', $filters['status']);
-            }
-        }
-
-        // 3. LOGIKA UMUM (Tetap sama)
-        else {
-            if ($filters['start_date'] && $filters['end_date']) {
-                $query->whereBetween('tanggal_bergabung', [$filters['start_date'], $filters['end_date']]);
-            }
-            if (! empty($filters['dusun']) && $filters['dusun'] != 'semua') {
-                $query->where('dusun', $filters['dusun']);
-            }
-            if (! empty($filters['status_cetak']) && $filters['status_cetak'] != 'semua') {
-                $status = $filters['status_cetak'] == 'sudah' ? 1 : 0;
-                $query->where('status_cetak', $status);
-            }
-        }
-
-        return $query;
-    }
-
-    private function downloadExcel(array $filters)
-    {
-        $prefix = ($filters['report_type'] == 'finance') ? 'Laporan-Keuangan-' : 'Laporan-Anggota-';
-        $filename = $prefix.now()->format('Y-m-d').'.xlsx';
+        $filters = $request->all();
+        
+        // Penamaan file dinamis berdasarkan kelompok laporan
+        $prefix = in_array($request->report_type, ['pendaftaran', 'rekap_simpanan', 'cashflow', 'simpanan_rinci']) 
+            ? 'Laporan-Keuangan-' 
+            : 'Laporan-Data-KUD-';
+            
+        // Penamaan menggunakan penanggalan format Indonesia
+        $filename = $prefix . now()->format('d-m-Y') . '.xlsx';
 
         return Excel::download(new MemberExport($filters), $filename);
-    }
-
-    private function downloadPdf(Request $request, array $filters)
-    {
-        $reportType = $filters['report_type'] ?? 'general';
-
-        // ====================================================================
-        // A. KELOMPOK DATA ANGGOTA & ADMINISTRASI
-        // ====================================================================
-
-        // 1. LAPORAN ANGGOTA TERPADU
-        if ($reportType == 'anggota_terpadu') {
-            $query = Member::query();
-            if (! empty($request->dusun) && $request->dusun != 'semua') {
-                $query->where('dusun', $request->dusun);
-            }
-            if (! empty($request->start_date) && ! empty($request->end_date)) {
-                $query->whereBetween('tanggal_bergabung', [$request->start_date, $request->end_date]);
-            }
-
-            $members = $query->get();
-            $title = 'Laporan Data Anggota Terpadu';
-
-            // Menyiapkan teks Dusun dan Periode Tanggal
-            $dusunText = (empty($request->dusun) || $request->dusun == 'semua') ? 'Semua Wilayah' : 'Wilayah '.$request->dusun;
-            $periodeText = (! empty($request->start_date) && ! empty($request->end_date))
-                ? \Carbon\Carbon::parse($request->start_date)->translatedFormat('d M Y').' s/d '.\Carbon\Carbon::parse($request->end_date)->translatedFormat('d M Y')
-                : 'Semua Waktu (Seluruh Data)';
-
-            // Gabungkan ke dalam Subtitle
-            $subtitle = "Filter: $dusunText | Periode Gabung: $periodeText";
-
-            $pdf = Pdf::loadView('reports.pdf_anggota_terpadu', compact('members', 'title', 'subtitle'));
-
-            return $pdf->setPaper('A4', 'landscape')->stream('Laporan-Anggota-Terpadu.pdf');
-        }
-
-        // 2. LAPORAN DEMOGRAFI & POTENSI
-        if ($reportType == 'demografi') {
-            $members = Member::where('status', 'active')->get();
-            $title = 'Laporan Demografi dan Potensi Lahan Anggota';
-            $subtitle = 'Data Seluruh Anggota Aktif KUD Gajah Mada';
-
-            $pdf = Pdf::loadView('reports.pdf_demografi', compact('members', 'title', 'subtitle'));
-
-            return $pdf->setPaper('A4', 'landscape')->stream('Laporan-Demografi.pdf');
-        }
-
-        // 3. LAPORAN ADMINISTRASI KTA
-        if ($reportType == 'kta') {
-            $query = Member::query();
-            if (! empty($request->status) && $request->status != 'semua') {
-                $query->where('status', $request->status);
-            }
-            if (! empty($request->status_cetak) && $request->status_cetak != 'semua') {
-                $statusCetak = $request->status_cetak == 'sudah' ? 1 : 0;
-                $query->where('status_cetak', $statusCetak);
-            }
-
-            $members = $query->get();
-            $title = 'Laporan Status Administrasi KTA';
-            $subtitle = 'Monitoring Pencetakan Kartu Tanda Anggota';
-
-            $pdf = Pdf::loadView('reports.pdf_kta', compact('members', 'title', 'subtitle'));
-
-            return $pdf->setPaper('A4', 'portrait')->stream('Laporan-Administrasi-KTA.pdf');
-        }
-
-        // 4. LAPORAN TOTAL LUAS LAHAN PERTANIAN
-        if ($reportType == 'distribusi_lahan') {
-            $dataLahan = Member::where('status', 'active')
-                ->selectRaw('dusun, COUNT(id) as total_anggota, SUM(luasan_lahan) as total_hektar')
-                ->groupBy('dusun')
-                ->get();
-
-            $title = 'Laporan Total Luas Lahan Pertanian';
-            $subtitle = 'Rekapitulasi Luasan Hektar per Wilayah/Dusun';
-
-            $pdf = Pdf::loadView('reports.pdf_distribusi_lahan', compact('dataLahan', 'title', 'subtitle'));
-
-            return $pdf->setPaper('A4', 'portrait')->stream('Laporan-Distribusi-Lahan.pdf');
-        }
-
-        // ====================================================================
-        // B. KELOMPOK KEUANGAN & SIMPANAN
-        // ====================================================================
-
-        // 5. LAPORAN PEMASUKAN PENDAFTARAN
-        if ($reportType == 'pendaftaran' || $reportType == 'finance') {
-            $query = Member::whereNotNull('file_bukti_bayar');
-            if (! empty($request->start_date) && ! empty($request->end_date)) {
-                $query->whereBetween('tanggal_bayar', [$request->start_date, $request->end_date]);
-            }
-
-            $members = $query->get();
-            $totalPemasukan = $members->sum('biaya_pendaftaran');
-
-            $title = 'Laporan Pemasukan Biaya Pendaftaran';
-
-            // Menyiapkan teks Periode Tanggal
-            $periodeText = (! empty($request->start_date) && ! empty($request->end_date))
-                ? \Carbon\Carbon::parse($request->start_date)->translatedFormat('d M Y').' s/d '.\Carbon\Carbon::parse($request->end_date)->translatedFormat('d M Y')
-                : 'Seluruh Data (Semua Waktu)';
-
-            $subtitle = "Pendaftaran Keanggotaan Baru | Periode Bayar: $periodeText";
-
-            $pdf = Pdf::loadView('reports.pdf_pendaftaran', compact('members', 'totalPemasukan', 'title', 'subtitle'));
-
-            return $pdf->setPaper('A4', 'portrait')->stream('Laporan-Pemasukan-Pendaftaran.pdf');
-        }
-
-        // 6. LAPORAN REKAPITULASI SIMPANAN
-        if ($reportType == 'rekap_simpanan') {
-            $members = Member::with(['savings'])->where('status', 'active')->get()->map(function ($member) {
-                $member->total_pokok = $member->savings->where('jenis_simpanan', 'pokok')->sum('jumlah');
-                $member->total_wajib = $member->savings->where('jenis_simpanan', 'wajib')->sum('jumlah');
-                $member->total_sukarela = $member->savings->where('jenis_simpanan', 'sukarela')->sum('jumlah');
-                $member->total_semua = $member->total_pokok + $member->total_wajib + $member->total_sukarela;
-
-                return $member;
-            });
-
-            $title = 'Laporan Rekapitulasi Simpanan Anggota';
-            $subtitle = 'Periode: Sampai Saat Ini';
-
-            $pdf = Pdf::loadView('reports.pdf_rekap_simpanan', compact('members', 'title', 'subtitle'));
-
-            return $pdf->setPaper('A4', 'landscape')->stream('Laporan-Simpanan.pdf');
-        }
-
-        // 7. LAPORAN ARUS KAS (CASHFLOW)
-        if ($reportType == 'cashflow') {
-            $startDate = $request->start_date ?? '2000-01-01';
-            $endDate = $request->end_date ?? now()->format('Y-m-d');
-
-            $pendaftaranMasuk = Member::whereBetween('tanggal_bayar', [$startDate, $endDate])->sum('biaya_pendaftaran');
-            $simpananMasuk = \App\Models\Saving::whereBetween('tanggal_bayar', [$startDate, $endDate])->sum('jumlah');
-            $angsuranMasuk = Angsuran::whereBetween('tanggal_bayar', [$startDate, $endDate])->sum('jumlah_bayar');
-
-            $pinjamanKeluar = Pinjaman::where('status', 'disetujui')
-                ->whereBetween('updated_at', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
-                ->sum('jumlah_pinjaman');
-
-            $totalMasuk = $pendaftaranMasuk + $simpananMasuk + $angsuranMasuk;
-            $saldoBersih = $totalMasuk - $pinjamanKeluar;
-
-            $title = 'Laporan Arus Kas (Cashflow) KUD';
-            $subtitle = 'Periode: '.\Carbon\Carbon::parse($startDate)->translatedFormat('d M Y').' s/d '.\Carbon\Carbon::parse($endDate)->translatedFormat('d M Y');
-
-            $data = compact('pendaftaranMasuk', 'simpananMasuk', 'angsuranMasuk', 'totalMasuk', 'pinjamanKeluar', 'saldoBersih', 'title', 'subtitle');
-            $pdf = Pdf::loadView('reports.pdf_cashflow', $data);
-
-            return $pdf->setPaper('A4', 'portrait')->stream('Laporan-Arus-Kas.pdf');
-        }
-
-        // 8. LAPORAN TRANSAKSI SIMPANAN RINCI
-        if ($reportType == 'simpanan_rinci') {
-            $query = \App\Models\Saving::with('member');
-
-            if (! empty($request->start_date) && ! empty($request->end_date)) {
-                $query->whereBetween('tanggal_bayar', [$request->start_date, $request->end_date]);
-                $periodeText = \Carbon\Carbon::parse($request->start_date)->translatedFormat('d M Y').' s/d '.\Carbon\Carbon::parse($request->end_date)->translatedFormat('d M Y');
-            } else {
-                $periodeText = 'Seluruh Data Transaksi';
-            }
-
-            $data = $query->orderBy('tanggal_bayar', 'asc')->get();
-            $title = 'Laporan Rincian Transaksi Simpanan';
-            $subtitle = "Periode Setor: $periodeText";
-
-            $pdf = Pdf::loadView('reports.pdf_simpanan_rinci', compact('data', 'title', 'subtitle'));
-
-            return $pdf->setPaper('A4', 'portrait')->stream('Laporan-Simpanan-Rinci.pdf');
-        }
-
-        // ====================================================================
-        // C. KELOMPOK PINJAMAN & KREDIT
-        // ====================================================================
-
-        // 9. LAPORAN REKAP PINJAMAN
-        if ($reportType == 'pinjaman_rekap') {
-            $query = Pinjaman::with('member');
-            if (! empty($request->status_pinjaman) && $request->status_pinjaman != 'semua') {
-                $query->where('status', $request->status_pinjaman);
-            }
-            if ($request->start_date && $request->end_date) {
-                $query->whereBetween('tanggal_pengajuan', [$request->start_date, $request->end_date]);
-            }
-            $data = $query->latest()->get();
-            $title = 'Laporan Rekapitulasi Pengajuan Pinjaman';
-            $subtitle = 'Filter: '.($request->status_pinjaman == 'semua' ? 'Semua Status' : ucfirst($request->status_pinjaman));
-
-            $pdf = Pdf::loadView('reports.pdf_pinjaman_rekap', compact('data', 'title', 'subtitle'));
-
-            return $pdf->setPaper('A4', 'landscape')->stream('Laporan-Pinjaman.pdf');
-        }
-
-        // 10. LAPORAN PINJAMAN BELUM LUNAS (TUNGGAKAN)
-        if ($reportType == 'pinjaman_tunggakan') {
-            $data = Pinjaman::with('member')->where('status', 'disetujui')->get();
-            $title = 'Laporan Pinjaman Anggota Belum Lunas';
-            $subtitle = 'Status: Disetujui (Dalam Masa Angsuran)';
-
-            $pdf = Pdf::loadView('reports.pdf_pinjaman_tunggakan', compact('data', 'title', 'subtitle'));
-
-            return $pdf->setPaper('A4', 'portrait')->stream('Laporan-Pinjaman-Belum-Lunas.pdf');
-        }
-
-        // 11. LAPORAN KOLEKTIBILITAS (STATUS KELANCARAN)
-        if ($reportType == 'kolektibilitas') {
-            $pinjamans = Pinjaman::with(['member', 'angsuran'])->whereIn('status', ['disetujui', 'lunas'])->get()->map(function ($pinjaman) {
-                $pinjaman->total_terbayar = $pinjaman->angsuran->sum('jumlah_bayar');
-                $pinjaman->sisa_hutang = $pinjaman->jumlah_pinjaman - $pinjaman->total_terbayar;
-
-                if ($pinjaman->sisa_hutang <= 0) {
-                    $pinjaman->kolektibilitas = 'Lunas';
-                } elseif ($pinjaman->angsuran->count() == 0 && now()->diffInDays($pinjaman->updated_at) > 30) {
-                    $pinjaman->kolektibilitas = 'Macet (Belum Ada Bayaran)';
-                } else {
-                    $pinjaman->kolektibilitas = 'Dalam Angsuran';
-                }
-
-                return $pinjaman;
-            });
-
-            $title = 'Laporan Kolektibilitas & Sisa Hutang Pinjaman';
-            $subtitle = 'Monitoring Kelancaran Kredit Anggota';
-
-            $pdf = Pdf::loadView('reports.pdf_kolektibilitas', compact('pinjamans', 'title', 'subtitle'));
-
-            return $pdf->setPaper('A4', 'landscape')->stream('Laporan-Kolektibilitas.pdf');
-        }
-
-        // 12. LAPORAN ANGSURAN MASUK
-        if ($reportType == 'angsuran_masuk') {
-            $query = Angsuran::with('pinjaman.member');
-            if ($request->filled('start_date') && $request->filled('end_date')) {
-                $query->whereBetween('tanggal_bayar', [$request->start_date, $request->end_date]);
-                $subtitle = 'Periode Bayar: '.\Carbon\Carbon::parse($request->start_date)->translatedFormat('d M Y').' s/d '.\Carbon\Carbon::parse($request->end_date)->translatedFormat('d M Y');
-            } else {
-                $subtitle = 'Periode Bayar: Seluruh Data (Semua Waktu)';
-            }
-
-            $data = $query->orderBy('tanggal_bayar', 'asc')->get();
-            $totalAngsuran = $data->sum('jumlah_bayar');
-            $title = 'Laporan Pemasukan Angsuran Anggota';
-
-            $pdf = Pdf::loadView('reports.pdf_angsuran_masuk', compact('data', 'title', 'subtitle', 'totalAngsuran'));
-
-            return $pdf->setPaper('A4', 'portrait')->stream('Laporan-Angsuran-Masuk.pdf');
-        }
-
-        // 13. LAPORAN REALISASI PENCAIRAN DANA
-        if ($reportType == 'realisasi_pencairan') {
-            $query = \App\Models\Pinjaman::with('member')->whereIn('status', ['disetujui', 'lunas']);
-
-            if (! empty($request->start_date) && ! empty($request->end_date)) {
-                // Menggunakan updated_at karena itu waktu terakhir status berubah jadi disetujui (pencairan)
-                $query->whereBetween('updated_at', [$request->start_date.' 00:00:00', $request->end_date.' 23:59:59']);
-                $periodeText = \Carbon\Carbon::parse($request->start_date)->translatedFormat('d M Y').' s/d '.\Carbon\Carbon::parse($request->end_date)->translatedFormat('d M Y');
-            } else {
-                $periodeText = 'Seluruh Data Pencairan';
-            }
-
-            $data = $query->orderBy('updated_at', 'asc')->get();
-            $title = 'Laporan Realisasi Pencairan Dana Pinjaman';
-            $subtitle = "Periode Pencairan: $periodeText";
-
-            $pdf = Pdf::loadView('reports.pdf_realisasi_pencairan', compact('data', 'title', 'subtitle'));
-
-            return $pdf->setPaper('A4', 'landscape')->stream('Laporan-Realisasi-Pencairan.pdf');
-        }
-
-        // ====================================================================
-        // D. KELOMPOK SISTEM & MANAJEMEN
-        // ====================================================================
-
-        // 14. LAPORAN PENGURUS
-        if ($reportType == 'pengurus') {
-            $data = Management::where('is_active', 1)->get();
-            $title = 'Daftar Susunan Pengurus KUD Gajah Mada';
-            $subtitle = 'Periode Aktif';
-
-            $pdf = Pdf::loadView('reports.pdf_pengurus', compact('data', 'title', 'subtitle'));
-
-            return $pdf->setPaper('A4', 'landscape')->stream('Laporan-Pengurus.pdf');
-        }
-
-        // 15. LAPORAN HAK AKSES PENGGUNA
-        if ($reportType == 'pengguna') {
-            $users = \App\Models\User::all();
-            $title = 'Laporan Data Hak Akses Pengguna';
-            $subtitle = 'Sistem Informasi Manajemen KUD Gajah Mada';
-
-            $pdf = Pdf::loadView('reports.pdf_pengguna', compact('users', 'title', 'subtitle'));
-
-            return $pdf->setPaper('A4', 'portrait')->stream('Laporan-Pengguna.pdf');
-        }
-
-        // DEFAULT FALLBACK JIKA ADA ERROR PARAMETER
-        return back()->with('error', 'Jenis Laporan Tidak Ditemukan.');
     }
 }

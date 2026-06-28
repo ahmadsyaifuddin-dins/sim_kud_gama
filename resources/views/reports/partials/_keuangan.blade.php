@@ -11,7 +11,6 @@
         <form action="{{ route('reports.export') }}" method="GET" target="_blank">
 
             <div class="grid md:grid-cols-2 gap-6">
-                <!-- KIRI: PILIHAN REPORT -->
                 <div>
                     <label class="block mb-2 text-sm font-bold text-slate-700">Pilih Jenis Laporan:</label>
                     <select name="report_type" x-model="reportType" required
@@ -36,15 +35,12 @@
                     </p>
                 </div>
 
-                <!-- KANAN: FILTER DINAMIS -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
                     <h4 class="mb-3 text-sm font-bold text-slate-700 border-b pb-1">Filter Data</h4>
 
-                    <!-- Pilihan Periode -->
-                    <div
-                        x-show="reportType === 'pendaftaran' || reportType === 'cashflow' || reportType === 'simpanan_rinci'">
+                    <div x-show="reportType === 'pendaftaran' || reportType === 'cashflow' || reportType === 'simpanan_rinci'">
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Periode Transaksi</label>
-                        <select x-model="periode" class="block w-full text-sm border-slate-300 rounded-lg mb-2">
+                        <select x-model="periode" name="filter_periode" class="block w-full text-sm border-slate-300 rounded-lg mb-2">
                             <option value="semua">Cetak Semua Waktu</option>
                             <option value="custom">Pilih Rentang Tanggal</option>
                         </select>
@@ -54,13 +50,15 @@
                                 <label class="text-[10px] text-slate-500">Dari Tanggal</label>
                                 <input type="date" name="start_date"
                                     class="block w-full text-xs border-slate-300 rounded-lg"
-                                    :required="periode === 'custom'">
+                                    :required="periode === 'custom'"
+                                    :disabled="periode !== 'custom'">
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-500">Sampai Tanggal</label>
                                 <input type="date" name="end_date"
                                     class="block w-full text-xs border-slate-300 rounded-lg"
-                                    :required="periode === 'custom'">
+                                    :required="periode === 'custom'"
+                                    :disabled="periode !== 'custom'">
                             </div>
                         </div>
                     </div>
@@ -71,7 +69,6 @@
                 </div>
             </div>
 
-            <!-- TOMBOL CETAK (Target _blank sudah ada di form tag) -->
             <div class="mt-6 flex justify-end gap-3 border-t pt-4">
                 <button type="submit" name="action" value="pdf"
                     class="flex items-center gap-2 px-6 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition shadow-md">

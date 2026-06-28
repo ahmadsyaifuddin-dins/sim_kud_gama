@@ -11,7 +11,6 @@
         <form action="{{ route('reports.export') }}" method="GET" target="_blank">
 
             <div class="grid md:grid-cols-2 gap-6">
-                <!-- KIRI: PILIHAN REPORT -->
                 <div>
                     <label class="block mb-2 text-sm font-bold text-slate-700">Pilih Jenis Laporan:</label>
                     <select name="report_type" x-model="reportType" required
@@ -40,11 +39,9 @@
                     </p>
                 </div>
 
-                <!-- KANAN: FILTER DINAMIS -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
                     <h4 class="mb-3 text-sm font-bold text-slate-700 border-b pb-1">Filter Data</h4>
 
-                    <!-- Filter Status Pinjaman -->
                     <div x-show="reportType === 'pinjaman_rekap'" class="mb-3">
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Status Pengajuan</label>
                         <select name="status_pinjaman" class="block w-full text-sm border-slate-300 rounded-lg">
@@ -55,11 +52,9 @@
                         </select>
                     </div>
 
-                    <!-- Filter Periode -->
-                    <div
-                        x-show="reportType === 'pinjaman_rekap' || reportType === 'angsuran_masuk' || reportType === 'realisasi_pencairan'">
+                    <div x-show="reportType === 'pinjaman_rekap' || reportType === 'angsuran_masuk' || reportType === 'realisasi_pencairan'">
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Periode Transaksi</label>
-                        <select x-model="periode" class="block w-full text-sm border-slate-300 rounded-lg mb-2">
+                        <select x-model="periode" name="filter_periode" class="block w-full text-sm border-slate-300 rounded-lg mb-2">
                             <option value="semua">Cetak Semua Waktu</option>
                             <option value="custom">Pilih Rentang Tanggal</option>
                         </select>
@@ -69,13 +64,15 @@
                                 <label class="text-[10px] text-slate-500">Dari</label>
                                 <input type="date" name="start_date"
                                     class="block w-full text-xs border-slate-300 rounded-lg"
-                                    :required="periode === 'custom'">
+                                    :required="periode === 'custom'"
+                                    :disabled="periode !== 'custom'">
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-500">Sampai</label>
                                 <input type="date" name="end_date"
                                     class="block w-full text-xs border-slate-300 rounded-lg"
-                                    :required="periode === 'custom'">
+                                    :required="periode === 'custom'"
+                                    :disabled="periode !== 'custom'">
                             </div>
                         </div>
                     </div>
