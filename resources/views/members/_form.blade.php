@@ -38,14 +38,26 @@
     {{-- Blok Data Pribadi --}}
     <div>
         <x-forms.label value="Nomor Anggota" required="true" />
-        <x-forms.input type="text" name="nomor_anggota"
-            value="{{ old('nomor_anggota', $member->nomor_anggota ?? '') }}" placeholder="Contoh: KUD-GM-0001"
-            required />
+        <x-forms.input 
+            type="text" 
+            name="nomor_anggota"
+            value="{{ old('nomor_anggota', $member->nomor_anggota ?? $nextNomorAnggota ?? '') }}" 
+            readonly
+            class="bg-gray-200 cursor-not-allowed text-gray-700 font-bold"
+            required 
+        />
+        <p class="text-[10px] text-gray-500 mt-1">*Nomor ini digenerate otomatis oleh sistem.</p>
     </div>
 
     <div>
-        <x-forms.numeric-input name="nik" label="NIK (Nomor KTP)" mode="nik" required="true"
-            placeholder="16 Digit Angka" :value="$member->nik ?? ''" />
+        <x-forms.label value="NIK (Nomor KTP)" required="true" />
+        <x-forms.numeric-input 
+            name="nik" 
+            mode="nik" 
+            required="true"
+            placeholder="16 Digit Angka" 
+            :value="$member->nik ?? ''" 
+        />
     </div>
 
     <div class="sm:col-span-2">
@@ -82,22 +94,42 @@
         <x-forms.input type="text" name="pekerjaan" value="{{ old('pekerjaan', $member->pekerjaan ?? '') }}" />
     </div>
 
+    {{-- Luasan Lahan Sawit --}}
     <div>
-        <x-forms.label value="Luasan Lahan Sawit (Hektar)" required="true" />
+        <x-forms.label value="Luasan Lahan Sawit" required="true" />
         <div class="relative mt-1">
-            <input type="number" step="0.01" name="luasan_lahan"
-                value="{{ old('luasan_lahan', $member->luasan_lahan ?? '') }}"
-                class="block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-purple-400 focus:ring focus:ring-purple-200 pr-10"
-                placeholder="Contoh: 2.5" required>
+            <input type="number" step="0.01" name="luasan_lahan" value="{{ old('luasan_lahan') }}" required
+                class="block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-pink-500 focus:ring-pink-500 pr-10"
+                placeholder="Contoh: 2.5">
             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                 <span class="text-gray-500 sm:text-sm font-bold">Ha</span>
             </div>
         </div>
+        
+        {{-- Keterangan Helper di-break agar rapi --}}
+        <div class="text-[10px] text-gray-500 mt-1.5 font-medium leading-relaxed">
+            <div class="flex items-start gap-1">
+                <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
+                <span>
+                    Masukkan angka bulat (misal: <strong>2</strong>) atau<br>
+                    gunakan tanda <strong>titik</strong> untuk desimal (misal: <strong>3.5</strong>).<br>
+                    <span class="text-red-500 font-bold">Jangan gunakan koma.</span>
+                </span>
+            </div>
+        </div>
+        
+        @error('luasan_lahan') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
     </div>
 
+    {{-- No HP / WA --}}
     <div>
-        <x-forms.numeric-input name="no_hp" label="No HP / WA" mode="no_hp" required="true"
-            placeholder="10-15 Digit Angka" :value="$member->no_hp ?? ''" />
+        <x-forms.label value="No HP / WA" required="true" />
+        <x-forms.numeric-input name="no_hp" mode="no_hp" required="true" placeholder="Awalan 08xxx (Misal: 081234...)" />
+        <p class="text-[10px] text-gray-500 mt-1.5 font-medium">
+            <i class="fa-solid fa-circle-info text-blue-500 mr-1"></i>
+            Pastikan nomor aktif di WhatsApp untuk <b>notifikasi</b> dan dimulai dengan awalan <strong>08xxx</strong>.
+        </p>
+        @error('no_hp') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
     </div>
 
     <div class="sm:col-span-2">
@@ -108,14 +140,46 @@
 
     <div>
         <x-forms.label value="Dusun" required="true" />
-        <x-forms.input type="text" name="dusun" value="{{ old('dusun', $member->dusun ?? '') }}"
-            placeholder="Nama Dusun" required />
+        <x-forms.dropdown name="dusun" required class="focus:border-pink-500 focus:ring-pink-500">
+            <option value="" disabled {{ old('dusun', $member->dusun ?? '') == '' ? 'selected' : '' }}>
+                -- Pilih Dusun --
+            </option>
+            
+            @php
+                $daftarDusun = ['Dusun I', 'Dusun II', 'Dusun III', 'Dusun Melati', 'Muara Ujung'];
+            @endphp
+            
+            @foreach($daftarDusun as $dsn)
+                <option value="{{ $dsn }}" {{ old('dusun', $member->dusun ?? '') == $dsn ? 'selected' : '' }}>
+                    {{ $dsn }}
+                </option>
+            @endforeach
+        </x-forms.dropdown>
+        <p class="text-[10px] text-gray-500 mt-1 font-medium">
+            *Hanya menampilkan daftar dusun di Desa Telaga Sari.
+        </p>
     </div>
 
+    {{-- Hapus sm:col-span-2 di div bawah ini agar sejajar dengan Dusun --}}
     <div>
         <x-forms.label value="Desa" required="true" />
-        <input type="text" name="desa" value="Telaga Sari" readonly
-            class="block w-full mt-1 text-sm bg-gray-100 border-gray-300 rounded-md shadow-sm cursor-not-allowed text-gray-500 font-semibold">
+        <input 
+            type="text" 
+            name="desa" 
+            value="Telaga Sari" 
+            readonly
+            class="block w-full mt-1 text-sm bg-gray-100 border-gray-300 rounded-md shadow-sm cursor-not-allowed text-gray-500 font-bold focus:ring-0"
+        >
+        {{-- Keterangan di-break menjadi list agar rapi --}}
+        <div class="text-[10px] text-gray-500 mt-1.5 font-medium leading-relaxed">
+            <div class="flex items-start gap-1.5">
+                <i class="fa-solid fa-lock text-gray-400 mt-0.5"></i>
+                <ul class="list-disc list-inside">
+                    <li>Data desa bersifat tetap dan tidak dapat diubah.</li>
+                    <li>KUD Gajah Mada beroperasi khusus di wilayah Desa Telaga Sari, Kec. Kelumpang Hilir.</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     <div>

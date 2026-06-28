@@ -35,7 +35,17 @@ class MemberController extends Controller
 
     public function create()
     {
-        return view('members.create');
+        // Cari member dengan ID terakhir
+        $lastMember = Member::latest('id')->first();
+        
+        // Tentukan ID berikutnya (jika kosong berarti ini member pertama = 1)
+        $nextId = $lastMember ? $lastMember->id + 1 : 1;
+        
+        // Buat format nomor anggotanya buat di-preview
+        $nextNomorAnggota = 'KUD-GM-' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
+
+        // Lempar variabel ke view
+        return view('members.create', compact('nextNomorAnggota'));
     }
 
     public function store(MemberRequest $request)
