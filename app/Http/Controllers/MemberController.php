@@ -15,7 +15,7 @@ class MemberController extends Controller
         // Urutkan: Pending duluan, baru tanggal terbaru
         $members = Member::orderByRaw("status = 'pending' DESC")
             ->latest()
-            ->paginate(10);
+            ->paginate(12);
 
         return view('members.index', compact('members'));
     }
