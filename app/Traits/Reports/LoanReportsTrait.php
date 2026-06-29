@@ -149,7 +149,8 @@ trait LoanReportsTrait
             'role' => 'Ketua'
         ], $extraData);
 
-        $pdf = Pdf::loadView($view, $payload);
+        $pdf = Pdf::loadView($view, $payload)
+        ->setOption(['isPhpEnabled' => true]);
         return $pdf->setPaper('A4', $paper)->stream('Cetak-' . str_replace(' ', '-', $title) . '.pdf');
     }
 }
