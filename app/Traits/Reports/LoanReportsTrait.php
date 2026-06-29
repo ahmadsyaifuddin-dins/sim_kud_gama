@@ -137,8 +137,15 @@ trait LoanReportsTrait
         }
 
         // ====================================================================
-        // BUNGKUS PAYLOAD DAN RENDER PDF
+        // GENERATE TOKEN & BUNGKUS PAYLOAD UNTUK RENDER PDF
         // ====================================================================
+        
+        // 1. Buat token unik (Gabungan Tipe Laporan dan Waktu Cetak)
+        $validationToken = base64_encode($reportType . '|' . now()->timestamp);
+        
+        // 2. Buat URL QR Code
+        $qrCodeData = route('validasi.dokumen', ['token' => $validationToken]);
+
         $payload = array_merge([
             'title' => $title,
             'subtitle' => $subtitle,
@@ -146,7 +153,8 @@ trait LoanReportsTrait
             'totalData' => $data->count(),
             'data' => $data,
             'type' => 'keuangan',
-            'role' => 'Ketua'
+            'role' => 'Ketua',
+            'qrCodeData' => $qrCodeData // <-- Inject QR Code di sini!
         ], $extraData);
 
         $pdf = Pdf::loadView($view, $payload)

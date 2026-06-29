@@ -6,6 +6,7 @@ use App\Models\Member;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 trait MemberReportsTrait
 {
@@ -105,7 +106,7 @@ trait MemberReportsTrait
             $paper = 'portrait';
             
             // Karena view distribusi_lahan sebelumnya pakai variabel $dataLahan, kita passing ke extraData
-            $extraData['dataLahan'] = $data; 
+            $extraData['dataLahan'] = $data;
         }
 
         // Jika tipe laporan tidak dikenali di trait ini
@@ -114,18 +115,27 @@ trait MemberReportsTrait
         }
 
         // ====================================================================
-        // BUNGKUS PAYLOAD DAN RENDER PDF
+        // GENERATE TOKEN & BUNGKUS PAYLOAD UNTUK RENDER PDF
         // ====================================================================
+        
+        // 1. Buat token unik (Gabungan Tipe Laporan dan Waktu Cetak)
+        $validationToken = base64_encode($reportType . '|' . now()->timestamp);
+        
+        // 2. Buat URL QR Code
+        $qrCodeData = route('validasi.dokumen', ['token' => $validationToken]);
+
         $payload = array_merge([
             'title' => $title,
             'subtitle' => $subtitle,
             'activeFilters' => $activeFilters,
             'totalData' => $data->count(),
-            'data' => $data
+            'data' => $data,
+            'qrCodeData' => $qrCodeData // <-- QR Code di-inject di sini!
         ], $extraData);
 
         $pdf = Pdf::loadView($view, $payload)
         ->setOption(['isPhpEnabled' => true]);
+        
         return $pdf->setPaper('A4', $paper)->stream('Cetak-' . str_replace(' ', '-', $title) . '.pdf');
     }
 }

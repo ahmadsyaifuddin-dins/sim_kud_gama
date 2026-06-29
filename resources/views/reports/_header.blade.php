@@ -25,12 +25,11 @@
         padding-bottom: 10px;
     }
 
-    /* 3. Kolom Kanan (Kosong/Penyeimbang) */
+    /* 3. Kolom Kanan (QR Code) */
     .kop-kanan {
         width: 20%;
         /* Lebar SAMA dengan kiri biar seimbang */
-        text-align: right;
-        /* Bisa diisi logo kedua jika ada */
+        text-align: right; /* Ini memastikan QR Code merapat ke kanan */
         vertical-align: middle;
         padding-bottom: 10px;
     }
@@ -84,6 +83,10 @@
         </td>
 
         <td class="kop-kanan">
+            {{-- Render QR Code sebagai Base64 SVG agar terbaca oleh DomPDF --}}
+            @if(isset($qrCodeData))
+                <img src="data:image/svg+xml;base64, {!! base64_encode(QrCode::format('svg')->size(80)->generate($qrCodeData)) !!}" style="width: 80px; height: auto;">
+            @endif
         </td>
     </tr>
 </table>
@@ -95,5 +98,4 @@
         <p>{{ $subtitle }}</p>
     @endif
 
-    <!-- <p>Dicetak pada: {{ now()->translatedFormat('d F Y') }}</p> -->
-</div>
+    </div>

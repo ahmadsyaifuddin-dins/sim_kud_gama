@@ -11,6 +11,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SavingController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ValidationController;
 use Illuminate\Support\Facades\Route;
 
 // ROUTE PUBLIK (Tanpa Login)
@@ -71,6 +72,8 @@ Route::middleware('auth')->group(function () {
 
         // Modul Pengurus
         Route::resource('managements', ManagementController::class);
+
+        Route::get('/validasi/{token}', [ValidationController::class, 'check'])->name('validasi.dokumen');
 
     });
 });
