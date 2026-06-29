@@ -95,6 +95,10 @@
                         </button>
                     @endif
 
+                    <a href="{{ route('members.show', $member->id) }}" class="w-7 h-7 flex items-center justify-center text-white bg-indigo-500 rounded text-xs hover:bg-indigo-600 transition" title="Lihat Detail">
+                        <i class="fa-solid fa-eye"></i>
+                    </a>
+
                     <a href="{{ route('members.edit', $member->id) }}" class="w-7 h-7 flex items-center justify-center text-white bg-purple-500 rounded text-xs hover:bg-purple-600 transition" title="Edit Data">
                         <i class="fa-solid fa-pen-to-square"></i>
                     </a>

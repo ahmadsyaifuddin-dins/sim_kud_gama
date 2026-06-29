@@ -127,6 +127,12 @@
                                     </button>
                                 @endif
 
+                                <a href="{{ route('members.show', $member->id) }}"
+                                    class="w-8 h-8 flex items-center justify-center text-white bg-indigo-500 rounded-lg hover:bg-indigo-600 shadow-sm transition"
+                                    title="Lihat Detail">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+
                                 <a href="{{ route('members.edit', $member->id) }}"
                                     class="w-8 h-8 flex items-center justify-center text-white bg-purple-500 rounded-lg hover:bg-purple-600 shadow-sm transition"
                                     title="Edit Data">

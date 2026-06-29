@@ -33,6 +33,11 @@ class MemberController extends Controller
         return back()->with('success', 'Anggota berhasil diverifikasi & diaktifkan!');
     }
 
+    public function show(Member $member)
+    {
+        return view('members.show', compact('member'));
+    }
+
     public function create()
     {
         // Cari member dengan ID terakhir
