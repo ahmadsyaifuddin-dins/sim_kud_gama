@@ -13,7 +13,7 @@ class AngsuranSeeder extends Seeder
     {
         $faker = Faker::create('id_ID');
         
-        // Mengambil HANYA pinjaman yang disetujui (Belum Lunas) atau Lunas untuk dicatat angsurannya
+        // Mengambil HANYA pinjaman yang disetujui (Belum Lunas) atau Lunas
         $pinjamanAktif = DB::table('pinjaman')
             ->whereIn('status', ['disetujui', 'lunas'])
             ->get();
@@ -22,21 +22,41 @@ class AngsuranSeeder extends Seeder
 
         if($pinjamanAktif->isEmpty() || empty($userIds)) return;
 
+        // Mendapatkan tanggal aktual saat script dijalankan (berdasarkan zona waktu Makassar)
+        $now = Carbon::now('Asia/Makassar');
+
         foreach ($pinjamanAktif as $pinjaman) {
-            // Jika statusnya Lunas, angsurannya full. Jika disetujui (Belum lunas), angsurannya baru sebagian (misal 1-3 kali).
-            $jumlahAngsuranDibayar = ($pinjaman->status == 'lunas') ? $pinjaman->lama_angsuran : rand(1, max(1, $pinjaman->lama_angsuran - 1));
+            // Jika status Lunas, angsuran full. Jika Disetujui, angsuran baru berjalan sebagian
+            $jumlahAngsuranDibayar = ($pinjaman->status === 'lunas') 
+                ? $pinjaman->lama_angsuran 
+                : rand(1, max(1, $pinjaman->lama_angsuran - 1));
+                
             $angsuranPerBulan = $pinjaman->jumlah_pinjaman / $pinjaman->lama_angsuran;
+            $tanggalPencairan = Carbon::parse($pinjaman->tanggal_pencairan);
 
             for ($ke = 1; $ke <= $jumlahAngsuranDibayar; $ke++) {
+                // Tambah bulan berdasarkan angsuran ke-
+                $tanggalBayar = $tanggalPencairan->copy()->addMonths($ke);
+
+                // Validasi Logika: Jangan buat data angsuran jika tanggal bayarnya melebihi hari ini
+                if ($tanggalBayar->greaterThan($now)) {
+                    break;
+                }
+
+                // Simulasi file upload public/uploads (70% peluang user upload bukti, sisanya bayar tunai/langsung)
+                $buktiBayar = $faker->boolean(70) 
+                    ? 'uploads/angsuran/dummy-bukti-bayar-' . $faker->uuid() . '.jpg' 
+                    : null;
+
                 DB::table('angsuran')->insert([
-                    'pinjaman_id' => $pinjaman->id,
-                    'angsuran_ke' => $ke,
-                    'jumlah_bayar' => round($angsuranPerBulan, 2),
-                    // Mensimulasikan pembayaran rutin bulanan dari tanggal pencairan, pastikan tidak melebihi tgl hari ini (20 Mei 2026)
-                    'tanggal_bayar' => Carbon::parse($pinjaman->tanggal_pencairan)->addMonths($ke)->format('Y-m-d'),
-                    'user_id' => $faker->randomElement($userIds),
-                    'created_at' => Carbon::now(),
-                    'updated_at' => Carbon::now(),
+                    'pinjaman_id'   => $pinjaman->id,
+                    'angsuran_ke'   => $ke,
+                    'jumlah_bayar'  => round($angsuranPerBulan, 2),
+                    'tanggal_bayar' => $tanggalBayar->format('Y-m-d'),
+                    'bukti_bayar'   => $buktiBayar,
+                    'user_id'       => $faker->randomElement($userIds),
+                    'created_at'    => $tanggalBayar->format('Y-m-d H:i:s'),
+                    'updated_at'    => $tanggalBayar->format('Y-m-d H:i:s'),
                 ]);
             }
         }

@@ -13,16 +13,16 @@ class MemberSeeder extends Seeder
     {
         $faker = Faker::create('id_ID');
 
-        // 1. Insert/Update Data Asli (Putri Ayunda Saraswati) - Menggunakan updateOrInsert agar tidak error duplicate
+        // 1. Insert/Update Data Asli (Putri Ayunda Saraswati) - Pasti Active
         DB::table('members')->updateOrInsert(
-            ['nomor_anggota' => 'KUD-GM-0001'], // Kunci pencarian
-            [ // Data yang diupdate/diinsert
-                'status' => 'active',
+            ['nomor_anggota' => 'KUD-GM-0001'],
+            [
+                'status' => 'active', // Pasti active
                 'nik' => '6312819728912211',
                 'nama_lengkap' => 'Putri Ayunda Saraswati',
                 'tempat_lahir' => 'BANJARMASIN',
                 'tanggal_lahir' => '2000-07-09',
-                'jenis_kelamin' => 'L', 
+                'jenis_kelamin' => 'P', 
                 'alamat_lengkap' => 'Jalan Hamengkubowono No 3',
                 'dusun' => 'Muara Ujung',
                 'desa' => 'Telaga Sari',
@@ -44,11 +44,11 @@ class MemberSeeder extends Seeder
             ]
         );
 
-        // 2. Insert/Update Data Asli (Mariyani)
+        // 2. Insert/Update Data Asli (Mariyani) - Pasti Active
         DB::table('members')->updateOrInsert(
             ['nomor_anggota' => 'KUD-GM-0002'],
             [
-                'status' => 'active',
+                'status' => 'active', // Pasti active
                 'nik' => '4435239800423983',
                 'nama_lengkap' => 'Mariyani',
                 'tempat_lahir' => 'Palangka Raya',
@@ -75,26 +75,38 @@ class MemberSeeder extends Seeder
             ]
         );
 
+        // --- MANAJEMEN STATUS UNTUK DATA DUMMY ---
+        // Membuat array berisi persis: 13 active, 2 inactive, 2 stopped, 1 pending (Total = 18)
+        $dummyStatuses = array_merge(
+            array_fill(0, 13, 'active'),
+            array_fill(0, 2, 'inactive'),
+            array_fill(0, 2, 'stopped'),
+            ['pending']
+        );
+        
+        // Acak posisi elemen di dalam array agar urutan yang di-generate natural
+        shuffle($dummyStatuses);
+
         // 3. Generate Data Dummy
-        // Perulangan kita naikkan hingga 20 agar total data di DB (termasuk yang lama) melimpah untuk laporan
         for ($i = 3; $i <= 20; $i++) {
             $nomorAnggota = 'KUD-GM-'.str_pad($i, 4, '0', STR_PAD_LEFT);
 
-            // CEK: Jika nomor anggota sudah ada di database (karena dump SQL awal), lewati iterasi ini agar tidak duplikat
             if (DB::table('members')->where('nomor_anggota', $nomorAnggota)->exists()) {
                 continue;
             }
 
             $gender = $faker->randomElement(['L', 'P']);
             $tanggalGabung = Carbon::now()->subDays(rand(1, 150))->format('Y-m-d');
-            
-            // Simulasi 90% member sudah lunas biaya pendaftaran agar muncul di laporan
             $isLunas = $faker->boolean(90);
+            
+            // Ambil satu status dari array yang sudah diacak tadi (dan hapus dari array)
+            // Jika karena suatu hal array kosong (harusnnya tidak), fallback ke 'active'
+            $statusMember = array_pop($dummyStatuses) ?? 'active';
 
             DB::table('members')->insert([
                 'nomor_anggota' => $nomorAnggota,
-                'status' => $faker->randomElement(['active', 'inactive']),
-                'nik' => $faker->unique()->numerify('################'), // Menggunakan unique() agar NIK tidak bentrok
+                'status' => $statusMember, // Gunakan status yang sudah dipetik dari array
+                'nik' => $faker->unique()->numerify('################'),
                 'nama_lengkap' => $faker->name($gender === 'L' ? 'male' : 'female'),
                 'tempat_lahir' => $faker->city(),
                 'tanggal_lahir' => $faker->dateTimeBetween('-50 years', '-20 years')->format('Y-m-d'),
