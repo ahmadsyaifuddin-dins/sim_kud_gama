@@ -2,13 +2,13 @@
 
 namespace App\Traits\Reports;
 
-use App\Models\Member;
-use App\Models\Saving;
 use App\Models\Angsuran;
+use App\Models\Member;
 use App\Models\Pinjaman;
+use App\Models\Saving;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 trait FinanceReportsTrait
 {
@@ -27,17 +27,17 @@ trait FinanceReportsTrait
         // ====================================================================
         if ($reportType == 'pendaftaran' || $reportType == 'finance') {
             $query = Member::whereNotNull('file_bukti_bayar');
-            
-            if (!empty($request->start_date) && !empty($request->end_date)) {
+
+            if (! empty($request->start_date) && ! empty($request->end_date)) {
                 $query->whereBetween('tanggal_bayar', [$request->start_date, $request->end_date]);
-                $activeFilters['Periode Pembayaran'] = Carbon::parse($request->start_date)->translatedFormat('d M Y') . ' s/d ' . Carbon::parse($request->end_date)->translatedFormat('d M Y');
+                $activeFilters['Periode Pembayaran'] = Carbon::parse($request->start_date)->translatedFormat('d M Y').' s/d '.Carbon::parse($request->end_date)->translatedFormat('d M Y');
             } else {
                 $activeFilters['Periode Pembayaran'] = 'Seluruh Waktu';
             }
 
             $data = $query->get();
             $extraData['totalPemasukan'] = $data->sum('biaya_pendaftaran');
-            
+
             $title = 'Laporan Pemasukan Biaya Pendaftaran';
             $view = 'reports.pdf_pendaftaran';
             $paper = 'portrait';
@@ -52,6 +52,7 @@ trait FinanceReportsTrait
                 $member->total_wajib = $member->savings->where('jenis_simpanan', 'wajib')->sum('jumlah');
                 $member->total_sukarela = $member->savings->where('jenis_simpanan', 'sukarela')->sum('jumlah');
                 $member->total_semua = $member->total_pokok + $member->total_wajib + $member->total_sukarela;
+
                 return $member;
             });
 
@@ -71,7 +72,7 @@ trait FinanceReportsTrait
             $endDate = $request->end_date ?? now()->format('Y-m-d');
 
             if ($request->filled('start_date') && $request->filled('end_date')) {
-                $activeFilters['Periode Transaksi'] = Carbon::parse($startDate)->translatedFormat('d M Y') . ' s/d ' . Carbon::parse($endDate)->translatedFormat('d M Y');
+                $activeFilters['Periode Transaksi'] = Carbon::parse($startDate)->translatedFormat('d M Y').' s/d '.Carbon::parse($endDate)->translatedFormat('d M Y');
             } else {
                 $activeFilters['Periode Transaksi'] = 'Seluruh Waktu (Keseluruhan)';
             }
@@ -81,7 +82,7 @@ trait FinanceReportsTrait
             $angsuranMasuk = Angsuran::whereBetween('tanggal_bayar', [$startDate, $endDate])->sum('jumlah_bayar');
 
             $pinjamanKeluar = Pinjaman::where('status', 'disetujui')
-                ->whereBetween('updated_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+                ->whereBetween('updated_at', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
                 ->sum('jumlah_pinjaman');
 
             $totalMasuk = $pendaftaranMasuk + $simpananMasuk + $angsuranMasuk;
@@ -94,7 +95,7 @@ trait FinanceReportsTrait
                 'angsuranMasuk' => $angsuranMasuk,
                 'pinjamanKeluar' => $pinjamanKeluar,
                 'totalMasuk' => $totalMasuk,
-                'saldoBersih' => $saldoBersih
+                'saldoBersih' => $saldoBersih,
             ];
 
             $title = 'Laporan Arus Kas (Cashflow) KUD';
@@ -108,15 +109,27 @@ trait FinanceReportsTrait
         elseif ($reportType == 'simpanan_rinci') {
             $query = Saving::with('member');
 
-            if (!empty($request->start_date) && !empty($request->end_date)) {
+            if (! empty($request->start_date) && ! empty($request->end_date)) {
                 $query->whereBetween('tanggal_bayar', [$request->start_date, $request->end_date]);
-                $activeFilters['Periode Setor'] = Carbon::parse($request->start_date)->translatedFormat('d M Y') . ' s/d ' . Carbon::parse($request->end_date)->translatedFormat('d M Y');
+                $activeFilters['Periode Setor'] = Carbon::parse($request->start_date)->translatedFormat('d M Y').' s/d '.Carbon::parse($request->end_date)->translatedFormat('d M Y');
             } else {
                 $activeFilters['Periode Setor'] = 'Seluruh Data Transaksi';
             }
 
             $data = $query->orderBy('tanggal_bayar', 'asc')->get();
-            
+
+            // --- LOGIKA BARU: Rekapitulasi per jenis simpanan ---
+            $rekapSimpanan = $data->groupBy('jenis_simpanan')->map(function ($row, $key) {
+                return (object) [
+                    'jenis_simpanan' => $key,
+                    'total_transaksi' => $row->count(),
+                    'total_uang' => $row->sum('jumlah'),
+                ];
+            })->values();
+
+            $extraData['rekapSimpanan'] = $rekapSimpanan;
+            // ----------------------------------------------------
+
             $title = 'Laporan Rincian Transaksi Simpanan';
             $view = 'reports.pdf_simpanan_rinci';
             $paper = 'portrait';
@@ -130,10 +143,10 @@ trait FinanceReportsTrait
         // ====================================================================
         // GENERATE TOKEN & BUNGKUS PAYLOAD UNTUK RENDER PDF
         // ====================================================================
-        
+
         // 1. Buat token unik (Gabungan Tipe Laporan dan Waktu Cetak)
-        $validationToken = base64_encode($reportType . '|' . now()->timestamp);
-        
+        $validationToken = base64_encode($reportType.'|'.now()->timestamp);
+
         // 2. Buat URL QR Code
         $qrCodeData = route('validasi.dokumen', ['token' => $validationToken]);
 
@@ -146,11 +159,12 @@ trait FinanceReportsTrait
             'data' => $data,
             'type' => 'keuangan',
             'role' => 'Ketua',
-            'qrCodeData' => $qrCodeData // <-- Inject QR Code
+            'qrCodeData' => $qrCodeData, // <-- Inject QR Code
         ], $extraData);
 
         $pdf = Pdf::loadView($view, $payload)
             ->setOption(['isPhpEnabled' => true]);
-        return $pdf->setPaper('A4', $paper)->stream('Cetak-' . str_replace(' ', '-', $title) . '.pdf');
+
+        return $pdf->setPaper('A4', $paper)->stream('Cetak-'.str_replace(' ', '-', $title).'.pdf');
     }
 }
