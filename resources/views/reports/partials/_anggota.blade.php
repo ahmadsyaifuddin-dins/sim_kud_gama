@@ -54,7 +54,7 @@
                             <select name="status" class="block w-full text-sm border-slate-300 rounded-lg">
                                 <option value="semua">-- Semua Status --</option>
                                 <option value="active">Aktif</option>
-                                <option value="inactive">Pasif</option>
+                                <option value="inactive">Non-Aktif</option>
                                 <option value="stopped">Keluar / Berhenti</option>
                             </select>
                         </div>
@@ -70,7 +70,8 @@
 
                     <div x-show="reportType === 'anggota_terpadu'" class="mt-3">
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Periode Pendaftaran</label>
-                        <select x-model="periode" name="filter_periode" class="block w-full text-sm border-slate-300 rounded-lg mb-2">
+                        <select x-model="periode" name="filter_periode"
+                            class="block w-full text-sm border-slate-300 rounded-lg mb-2">
                             <option value="semua">Cetak Semua Waktu</option>
                             <option value="custom">Pilih Rentang Tanggal</option>
                         </select>
@@ -80,15 +81,13 @@
                                 <label class="text-[10px] text-slate-500">Dari Tanggal</label>
                                 <input type="date" name="start_date"
                                     class="block w-full text-xs border-slate-300 rounded-lg"
-                                    :required="periode === 'custom'"
-                                    :disabled="periode !== 'custom'">
+                                    :required="periode === 'custom'" :disabled="periode !== 'custom'">
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-500">Sampai Tanggal</label>
                                 <input type="date" name="end_date"
                                     class="block w-full text-xs border-slate-300 rounded-lg"
-                                    :required="periode === 'custom'"
-                                    :disabled="periode !== 'custom'">
+                                    :required="periode === 'custom'" :disabled="periode !== 'custom'">
                             </div>
                         </div>
                     </div>
