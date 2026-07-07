@@ -40,7 +40,32 @@
 
                     <td>{{ $item->alamat_lengkap ?? '-' }}</td>
 
-                    <td class="text-center">{{ ucfirst($item->status) }}</td>
+                    {{-- <td class="text-center">{{ ucfirst($item->status) }}</td> --}}
+                    <td class="text-center">
+                        @php
+                            $statusRaw = ucfirst($item->status);
+
+                            // 1. Menentukan Bahasa
+                            $statusLabel = match ($statusRaw) {
+                                'Active' => 'Aktif',
+                                'Inactive' => 'Non-Aktif',
+                                'Stopped' => 'Berhenti',
+                                default => strtoupper($item->status),
+                            };
+
+                            // 2. Menentukan Kode Warna (Hex Code)
+                            $statusColor = match ($statusRaw) {
+                                'Active' => '#15803d', /* Hijau Gelap agar jelas di print putih/kertas */
+                                'Inactive' => '#f59e0b', /* Oranye Gelap */
+                                'Stopped' => '#b91c1c', /* Merah Gelap */
+                                default => '#374151', /* Abu-abu (Default) */
+                            };
+                        @endphp
+
+                        <strong style="color: {{ $statusColor }};">
+                            {{ $statusLabel }}
+                        </strong>
+                    </td>
                     <td class="text-center">
                         @if ($item->status_cetak)
                             <span class="badge-sukses">Sudah Dicetak</span>
