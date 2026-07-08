@@ -48,13 +48,16 @@
                             <option value="semua">-- Semua Status --</option>
                             <option value="menunggu">Menunggu</option>
                             <option value="disetujui">Disetujui</option>
+                            <option value="lunas">Lunas</option>
                             <option value="ditolak">Ditolak</option>
                         </select>
                     </div>
 
-                    <div x-show="reportType === 'pinjaman_rekap' || reportType === 'angsuran_masuk' || reportType === 'realisasi_pencairan'">
+                    <div
+                        x-show="reportType === 'pinjaman_rekap' || reportType === 'angsuran_masuk' || reportType === 'realisasi_pencairan'">
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Periode Transaksi</label>
-                        <select x-model="periode" name="filter_periode" class="block w-full text-sm border-slate-300 rounded-lg mb-2">
+                        <select x-model="periode" name="filter_periode"
+                            class="block w-full text-sm border-slate-300 rounded-lg mb-2">
                             <option value="semua">Cetak Semua Waktu</option>
                             <option value="custom">Pilih Rentang Tanggal</option>
                         </select>
@@ -64,15 +67,13 @@
                                 <label class="text-[10px] text-slate-500">Dari</label>
                                 <input type="date" name="start_date"
                                     class="block w-full text-xs border-slate-300 rounded-lg"
-                                    :required="periode === 'custom'"
-                                    :disabled="periode !== 'custom'">
+                                    :required="periode === 'custom'" :disabled="periode !== 'custom'">
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-500">Sampai</label>
                                 <input type="date" name="end_date"
                                     class="block w-full text-xs border-slate-300 rounded-lg"
-                                    :required="periode === 'custom'"
-                                    :disabled="periode !== 'custom'">
+                                    :required="periode === 'custom'" :disabled="periode !== 'custom'">
                             </div>
                         </div>
                     </div>

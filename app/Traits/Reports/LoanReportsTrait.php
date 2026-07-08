@@ -2,11 +2,11 @@
 
 namespace App\Traits\Reports;
 
-use App\Models\Pinjaman;
 use App\Models\Angsuran;
+use App\Models\Pinjaman;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 trait LoanReportsTrait
 {
@@ -25,8 +25,8 @@ trait LoanReportsTrait
         // ====================================================================
         if ($reportType == 'pinjaman_rekap') {
             $query = Pinjaman::with('member');
-            
-            if (!empty($request->status_pinjaman) && $request->status_pinjaman != 'semua') {
+
+            if (! empty($request->status_pinjaman) && $request->status_pinjaman != 'semua') {
                 $query->where('status', $request->status_pinjaman);
                 $activeFilters['Status Pengajuan'] = ucfirst($request->status_pinjaman);
             } else {
@@ -35,7 +35,7 @@ trait LoanReportsTrait
 
             if ($request->filled('start_date') && $request->filled('end_date')) {
                 $query->whereBetween('tanggal_pengajuan', [$request->start_date, $request->end_date]);
-                $activeFilters['Periode Pengajuan'] = Carbon::parse($request->start_date)->translatedFormat('d M Y') . ' s/d ' . Carbon::parse($request->end_date)->translatedFormat('d M Y');
+                $activeFilters['Periode Pengajuan'] = Carbon::parse($request->start_date)->translatedFormat('d M Y').' s/d '.Carbon::parse($request->end_date)->translatedFormat('d M Y');
             } else {
                 $activeFilters['Periode Pengajuan'] = 'Seluruh Waktu';
             }
@@ -44,6 +44,13 @@ trait LoanReportsTrait
             $title = 'Laporan Rekapitulasi Pengajuan Pinjaman';
             $view = 'reports.pdf_pinjaman_rekap';
             $paper = 'landscape';
+
+            // --- TAMBAHAN KODE DI SINI ---
+            // Hitung total data yang statusnya 'lunas' langsung dari collection $data
+            $totalLunas = $data->where('status', 'lunas')->count();
+
+            // Masukkan ke array extraData agar otomatis di-merge ke payload utama
+            $extraData['totalLunas'] = $totalLunas;
         }
 
         // ====================================================================
@@ -51,10 +58,10 @@ trait LoanReportsTrait
         // ====================================================================
         elseif ($reportType == 'pinjaman_tunggakan') {
             $data = Pinjaman::with('member')->where('status', 'disetujui')->get();
-            
+
             $activeFilters['Status Pinjaman'] = 'Disetujui (Dalam Masa Angsuran)';
             $activeFilters['Sifat Data'] = 'Data Berjalan (Real-time)';
-            
+
             $title = 'Laporan Pinjaman Anggota Belum Lunas';
             $view = 'reports.pdf_pinjaman_tunggakan';
             $paper = 'portrait';
@@ -84,7 +91,7 @@ trait LoanReportsTrait
 
             $activeFilters['Fokus Analisis'] = 'Monitoring Kelancaran Bayar & Sisa Hutang';
             $activeFilters['Sifat Data'] = 'Data Akumulatif Sampai Saat Ini';
-            
+
             $title = 'Laporan Kolektibilitas & Sisa Hutang Pinjaman';
             $view = 'reports.pdf_kolektibilitas';
             $paper = 'landscape';
@@ -95,17 +102,17 @@ trait LoanReportsTrait
         // ====================================================================
         elseif ($reportType == 'angsuran_masuk') {
             $query = Angsuran::with('pinjaman.member');
-            
+
             if ($request->filled('start_date') && $request->filled('end_date')) {
                 $query->whereBetween('tanggal_bayar', [$request->start_date, $request->end_date]);
-                $activeFilters['Periode Pembayaran'] = Carbon::parse($request->start_date)->translatedFormat('d M Y') . ' s/d ' . Carbon::parse($request->end_date)->translatedFormat('d M Y');
+                $activeFilters['Periode Pembayaran'] = Carbon::parse($request->start_date)->translatedFormat('d M Y').' s/d '.Carbon::parse($request->end_date)->translatedFormat('d M Y');
             } else {
                 $activeFilters['Periode Pembayaran'] = 'Seluruh Waktu';
             }
 
             $data = $query->orderBy('tanggal_bayar', 'asc')->get();
             $extraData['totalAngsuran'] = $data->sum('jumlah_bayar');
-            
+
             $title = 'Laporan Pemasukan Angsuran Anggota';
             $view = 'reports.pdf_angsuran_masuk';
             $paper = 'portrait';
@@ -117,15 +124,15 @@ trait LoanReportsTrait
         elseif ($reportType == 'realisasi_pencairan') {
             $query = Pinjaman::with('member')->whereIn('status', ['disetujui', 'lunas']);
 
-            if (!empty($request->start_date) && !empty($request->end_date)) {
-                $query->whereBetween('updated_at', [$request->start_date . ' 00:00:00', $request->end_date . ' 23:59:59']);
-                $activeFilters['Periode Pencairan'] = Carbon::parse($request->start_date)->translatedFormat('d M Y') . ' s/d ' . Carbon::parse($request->end_date)->translatedFormat('d M Y');
+            if (! empty($request->start_date) && ! empty($request->end_date)) {
+                $query->whereBetween('updated_at', [$request->start_date.' 00:00:00', $request->end_date.' 23:59:59']);
+                $activeFilters['Periode Pencairan'] = Carbon::parse($request->start_date)->translatedFormat('d M Y').' s/d '.Carbon::parse($request->end_date)->translatedFormat('d M Y');
             } else {
                 $activeFilters['Periode Pencairan'] = 'Seluruh Data Pencairan';
             }
 
             $data = $query->orderBy('updated_at', 'asc')->get();
-            
+
             $title = 'Laporan Realisasi Pencairan Dana Pinjaman';
             $view = 'reports.pdf_realisasi_pencairan';
             $paper = 'landscape';
@@ -139,10 +146,10 @@ trait LoanReportsTrait
         // ====================================================================
         // GENERATE TOKEN & BUNGKUS PAYLOAD UNTUK RENDER PDF
         // ====================================================================
-        
+
         // 1. Buat token unik (Gabungan Tipe Laporan dan Waktu Cetak)
-        $validationToken = base64_encode($reportType . '|' . now()->timestamp);
-        
+        $validationToken = base64_encode($reportType.'|'.now()->timestamp);
+
         // 2. Buat URL QR Code
         $qrCodeData = route('validasi.dokumen', ['token' => $validationToken]);
 
@@ -154,11 +161,12 @@ trait LoanReportsTrait
             'data' => $data,
             'type' => 'keuangan',
             'role' => 'Ketua',
-            'qrCodeData' => $qrCodeData // <-- Inject QR Code di sini!
+            'qrCodeData' => $qrCodeData, // <-- Inject QR Code di sini!
         ], $extraData);
 
         $pdf = Pdf::loadView($view, $payload)
-        ->setOption(['isPhpEnabled' => true]);
-        return $pdf->setPaper('A4', $paper)->stream('Cetak-' . str_replace(' ', '-', $title) . '.pdf');
+            ->setOption(['isPhpEnabled' => true]);
+
+        return $pdf->setPaper('A4', $paper)->stream('Cetak-'.str_replace(' ', '-', $title).'.pdf');
     }
 }

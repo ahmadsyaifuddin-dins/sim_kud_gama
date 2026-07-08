@@ -8,7 +8,7 @@
                 <td width="35%">: {{ $totalData ?? 0 }} Baris Data</td>
             </tr>
 
-            {{-- Tambahan Khusus untuk Laporan KTA jika variabel dikirim dari Controller/Trait --}}
+            {{-- Tambahan Khusus untuk Laporan KTA --}}
             @if (isset($sudahCetak) && isset($belumCetak))
                 <tr>
                     <td><strong>Sudah Tercetak</strong></td>
@@ -18,6 +18,15 @@
                 </tr>
             @endif
 
+            {{-- Tambahan Khusus untuk Laporan Pinjaman --}}
+            @if (isset($totalLunas))
+                <tr>
+                    <td><strong>Total Lunas</strong></td>
+                    <td colspan="3">: {{ $totalLunas }} Pinjaman</td>
+                </tr>
+            @endif
+
+            {{-- Filter Aktif --}}
             @if (isset($activeFilters) && count($activeFilters) > 0)
                 @foreach ($activeFilters as $label => $value)
                     <tr>
