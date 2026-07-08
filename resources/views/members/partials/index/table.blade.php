@@ -1,4 +1,5 @@
-<div x-show="viewMode === 'table'" x-cloak class="w-full overflow-hidden rounded-xl shadow-xs bg-white border border-gray-200">
+<div x-show="viewMode === 'table'" x-cloak
+    class="w-full overflow-hidden rounded-xl shadow-xs bg-white border border-gray-200">
     <div class="w-full overflow-x-auto">
         <table class="w-full whitespace-no-wrap">
             <thead>
@@ -34,7 +35,8 @@
                                         <i class="fa-solid fa-id-card text-purple-400 mr-1"></i>{{ $member->nik }}
                                     </p>
                                     <p class="text-[10px] text-gray-400 whitespace-nowrap">
-                                        <i class="fa-regular fa-calendar-check mr-1"></i> Gabung: {{ \Carbon\Carbon::parse($member->tanggal_bergabung)->translatedFormat('d M Y') }}
+                                        <i class="fa-regular fa-calendar-check mr-1"></i> Gabung:
+                                        {{ \Carbon\Carbon::parse($member->tanggal_bergabung)->translatedFormat('d M Y') }}
                                     </p>
                                 </div>
                             </div>
@@ -44,7 +46,8 @@
                             <p class="truncate w-48 font-medium" title="{{ $member->alamat_lengkap }}">
                                 {{ Str::limit($member->alamat_lengkap, 30) }}
                             </p>
-                            <span class="text-[10px] font-bold text-gray-600 bg-gray-200 inline-block px-2 py-0.5 rounded mt-1 uppercase tracking-wider">
+                            <span
+                                class="text-[10px] font-bold text-gray-600 bg-gray-200 inline-block px-2 py-0.5 rounded mt-1 uppercase tracking-wider">
                                 {{ $member->dusun }}
                             </span>
                         </td>
@@ -52,11 +55,16 @@
                         <td class="px-4 py-3 text-xs text-center">
                             @if ($member->status == 'pending')
                                 <div class="flex flex-col items-center gap-2">
-                                    <span class="px-2 py-1 font-bold leading-tight text-orange-700 bg-orange-100 rounded-full animate-pulse border border-orange-200">
+                                    <span
+                                        class="px-2 py-1 font-bold leading-tight text-orange-700 bg-orange-100 rounded-full animate-pulse border border-orange-200">
                                         VERIFIKASI
                                     </span>
+
+                                    {{-- Form diupdate menggunakan class "confirm-action" dan data-swal attributes --}}
                                     <form action="{{ route('members.approve', $member->id) }}" method="POST"
-                                        onsubmit="return confirm('Verifikasi anggota ini? Nomor anggota akan digenerate ulang menjadi KUD-GM-XXX.');">
+                                        class="confirm-action" data-swal-title="Verifikasi Anggota?"
+                                        data-swal-text="Verifikasi anggota ini? Nomor anggota akan digenerate ulang menjadi KUD-GM-XXX."
+                                        data-swal-icon="question" data-swal-confirm="Ya, Setujui!">
                                         @csrf
                                         @method('PUT')
                                         <button type="submit"
@@ -66,17 +74,21 @@
                                     </form>
                                 </div>
                             @elseif ($member->status == 'active')
-                                <span class="px-2 py-1 font-bold leading-tight text-green-700 bg-green-100 rounded-full border border-green-200">AKTIF</span>
+                                <span
+                                    class="px-2 py-1 font-bold leading-tight text-green-700 bg-green-100 rounded-full border border-green-200">AKTIF</span>
                             @elseif ($member->status == 'inactive')
-                                <span class="px-2 py-1 font-bold leading-tight text-yellow-700 bg-yellow-100 rounded-full border border-yellow-200">PASIF</span>
+                                <span
+                                    class="px-2 py-1 font-bold leading-tight text-yellow-700 bg-yellow-100 rounded-full border border-yellow-200">PASIF</span>
                             @elseif ($member->status == 'stopped')
-                                <span class="px-2 py-1 font-bold leading-tight text-red-700 bg-red-100 rounded-full border border-red-200">BERHENTI</span>
+                                <span
+                                    class="px-2 py-1 font-bold leading-tight text-red-700 bg-red-100 rounded-full border border-red-200">BERHENTI</span>
                             @endif
                         </td>
 
                         <td class="px-4 py-3 text-xs text-center">
                             @if ($member->file_bukti_bayar)
-                                <span class="px-2 py-1 font-bold leading-tight text-green-700 bg-green-100 rounded-full">
+                                <span
+                                    class="px-2 py-1 font-bold leading-tight text-green-700 bg-green-100 rounded-full">
                                     <i class="fa-solid fa-check-double mr-1"></i> LUNAS
                                 </span>
                             @else
@@ -88,11 +100,13 @@
 
                         <td class="px-4 py-3 text-xs text-center">
                             @if ($member->status_cetak)
-                                <span class="inline-block px-2 py-1 font-bold text-blue-700 bg-blue-100 rounded-full whitespace-nowrap">
+                                <span
+                                    class="inline-block px-2 py-1 font-bold text-blue-700 bg-blue-100 rounded-full whitespace-nowrap">
                                     <i class="fa-solid fa-print mr-1"></i> Sudah Dicetak
                                 </span>
                             @else
-                                <span class="inline-block px-2 py-1 font-bold text-gray-600 bg-gray-200 rounded-full whitespace-nowrap">
+                                <span
+                                    class="inline-block px-2 py-1 font-bold text-gray-600 bg-gray-200 rounded-full whitespace-nowrap">
                                     Belum Dicetak
                                 </span>
                             @endif
