@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Pendaftaran Anggota Baru - KUD GM</title>
+    <title>Pendaftaran Anggota Baru - KUD GAMA</title>
     
     <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
     
