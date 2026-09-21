@@ -4,14 +4,48 @@
 <div :class="sidebarOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'"
     class="fixed z-30 inset-y-0 left-0 w-70 transition duration-300 transform bg-pink-700 overflow-y-auto lg:translate-x-0 lg:static lg:inset-0 border-r border-pink-500 shadow-xl">
 
-    <div class="flex items-center justify-center mt-8 mb-6">
-        <div class="flex flex-col items-center gap-2">
-            <div class="bg-white p-1 rounded-full shadow-lg">
-                <img src="{{ asset('logo/kud-logo.jpg') }}" alt="Logo KUD" class="h-16 w-16 rounded-full object-cover">
+    <div class="relative flex items-center justify-center mt-8 mb-6 pt-1">
+        {{-- Glow aurora di belakang --}}
+        <div
+            class="absolute h-24 w-44 bg-gradient-to-br from-pink-400/40 via-fuchsia-400/25 to-transparent blur-2xl rounded-full pointer-events-none animate-pulse">
+        </div>
+
+        <div class="relative flex flex-col items-center gap-3">
+            {{-- Logo dengan cincin gradien berputar --}}
+            <div class="relative">
+                <div
+                    class="absolute -inset-1.5 rounded-full opacity-60 blur-[3px] bg-[conic-gradient(from_180deg_at_50%_50%,#fb7185,#c084fc,#f472b6,#fb7185)] animate-spin [animation-duration:8s]">
+                </div>
+                <div
+                    class="relative h-20 w-20 rounded-full bg-gradient-to-br from-pink-300 via-white to-fuchsia-300 p-[3px] shadow-xl shadow-pink-900/40">
+                    <div class="h-full w-full rounded-full bg-white overflow-hidden ring-1 ring-pink-200/60">
+                        <img src="{{ asset('logo/kud-logo.jpg') }}" alt="Logo KUD"
+                            class="h-full w-full rounded-full object-cover">
+                    </div>
+                </div>
+                <span
+                    class="absolute -bottom-0.5 -right-0.5 h-5 w-5 rounded-full bg-gradient-to-br from-fuchsia-400 to-pink-600 border-2 border-pink-700 flex items-center justify-center shadow-md">
+                    <i class="fa-solid fa-bolt text-[8px] text-white"></i>
+                </span>
             </div>
-            <span class="text-white text-xl font-bold tracking-wide mt-2">
-                KUD GAMA
-            </span>
+
+            {{-- Nama & tagline --}}
+            <div class="relative text-center">
+                <span
+                    class="block text-2xl font-black tracking-[0.25em] bg-clip-text text-transparent bg-gradient-to-r from-pink-100 via-white to-fuchsia-200 drop-shadow-[0_2px_6px_rgba(236,72,153,0.35)]">
+                    KUD GAMA
+                </span>
+                <div class="mt-1.5 flex items-center justify-center gap-2">
+                    <span class="h-px w-8 bg-gradient-to-r from-transparent to-pink-300/80"></span>
+                    <span class="text-[9px] font-bold tracking-[0.3em] text-pink-200/90 uppercase">Manajemen Sistem KUD</span>
+                    <span class="h-px w-8 bg-gradient-to-l from-transparent to-pink-300/80"></span>
+                </div>
+                <span
+                    class="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur border border-white/15 text-[9px] font-bold text-pink-100 tracking-wider uppercase shadow-inner">
+                    <i class="fa-solid fa-wand-magic-sparkles text-fuchsia-200 text-[9px]"></i>
+                    SIMKUD GAMA 2.O
+                </span>
+            </div>
         </div>
     </div>
 

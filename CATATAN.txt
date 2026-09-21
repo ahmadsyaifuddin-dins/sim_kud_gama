@@ -2,22 +2,7 @@
 
 
 
-4. buat perkeren (agak futuristik karna dikit ya sebagai revisi aplikasi jadi sedikit ada peningkatan di ui sidebar nya ini) dong tampilan di ui navigation bladenya terutama pada bagian 
-<div class="flex items-center justify-center mt-8 mb-6">
-        <div class="flex flex-col items-center gap-2">
-            <div class="bg-white p-1 rounded-full shadow-lg">
-                <img src="{{ asset('logo/kud-logo.jpg') }}" alt="Logo KUD" class="h-16 w-16 rounded-full object-cover">
-            </div>
-            <span class="text-white text-xl font-bold tracking-wide mt-2">
-                KUD GAMA
-            </span>
-        </div>
-    </div>
 
-
-
-
-6. pastikan tulisan tulisan seperti &rarr; terus &times; dan sejenisnya itu pastikan diperbaiki ya agar gak membuat kebingungan dan keanehan
 
 
 
@@ -48,3 +33,21 @@
 
 
 7. pada index pinjaman itu kan ada confirm setujui pinjaman dan tolak pinjaman masih menggunakan confirm bawaan kan ya nah itu ubah ke sweetalert2 yg sudah di atur (aku lupa kode yg handle modularnya nah pakai itu ya) hati hati ngebug DONEE
+
+
+
+4. oke, sekarang buat perkeren (namun tetap mempertahankan feminisme ui nya ya (agak futuristik karna dikit ya sebagai revisi aplikasi jadi sedikit ada peningkatan di ui sidebar nya ini) dong tampilan di ui navigation bladenya terutama pada bagian DONE
+<div class="flex items-center justify-center mt-8 mb-6">
+        <div class="flex flex-col items-center gap-2">
+            <div class="bg-white p-1 rounded-full shadow-lg">
+                <img src="{{ asset('logo/kud-logo.jpg') }}" alt="Logo KUD" class="h-16 w-16 rounded-full object-cover">
+            </div>
+            <span class="text-white text-xl font-bold tracking-wide mt-2">
+                KUD GAMA
+            </span>
+        </div>
+    </div>
+
+
+6. pastikan tulisan tulisan seperti &rarr; terus &times; dan sejenisnya itu pastikan diperbaiki ya agar gak membuat kebingungan dan keanehan DONE
+
