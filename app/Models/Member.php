@@ -55,4 +55,15 @@ class Member extends Model
     {
         return $this->hasMany(Saving::class);
     }
+
+    // Relasi: Satu anggota punya banyak pengajuan pinjaman
+    public function pinjamen()
+    {
+        return $this->hasMany(Pinjaman::class);
+    }
+
+    public function shuDistributions()
+    {
+        return $this->hasMany(ShuMemberDistribution::class);
+    }
 }

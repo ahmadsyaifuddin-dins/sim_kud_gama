@@ -62,8 +62,11 @@
                         <h4 class="text-sm font-bold text-gray-800 border-b pb-2 mb-3"><i class="fa-solid fa-bolt text-yellow-500 mr-2"></i>Aksi Cepat</h4>
                         
                         @if ($member->status == 'pending')
-                            <form action="{{ route('members.approve', $member->id) }}" method="POST" onsubmit="return confirm('Verifikasi anggota ini?');">
-                                @csrf @method('PUT')
+                            <form action="{{ route('members.approve', $member->id) }}" method="POST" class="confirm-action"
+                                    data-swal-title="Verifikasi Anggota?"
+                                    data-swal-text="Verifikasi pendaftaran {{ $member->nama_lengkap }}? Anggota akan aktif menggunakan aplikasi."
+                                    data-swal-icon="question" data-swal-confirm="Ya, Verifikasi!" data-swal-color="#16a34a">
+                                    @csrf @method('PUT')
                                 <button type="submit" class="w-full flex items-center justify-center px-4 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
                                     <i class="fa-solid fa-check-circle mr-2"></i> Verifikasi Pendaftaran
                                 </button>

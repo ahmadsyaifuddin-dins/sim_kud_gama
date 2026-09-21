@@ -12,16 +12,18 @@ document.addEventListener('submit', function(e) {
         const text = form.getAttribute('data-swal-text') || 'Data ini akan dihapus dan tidak dapat dikembalikan!';
         const icon = form.getAttribute('data-swal-icon') || 'warning';
         const confirmBtn = form.getAttribute('data-swal-confirm') || 'Ya, Hapus!';
+        const cancelBtn = form.getAttribute('data-swal-cancel') || 'Batal';
+        const confirmColor = form.getAttribute('data-swal-color') || '#ef4444';
 
         Swal.fire({
             title: title,
             text: text,
             icon: icon,
             showCancelButton: true,
-            confirmButtonColor: '#ef4444',
+            confirmButtonColor: confirmColor,
             cancelButtonColor: '#64748b',
             confirmButtonText: confirmBtn,
-            cancelButtonText: 'Batal',
+            cancelButtonText: cancelBtn,
             reverseButtons: true
         }).then((result) => {
             if (result.isConfirmed) {

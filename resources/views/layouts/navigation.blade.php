@@ -27,6 +27,13 @@
                 </x-slot>
                 {{ __('Dashboard') }}
             </x-nav-link>
+
+            <x-nav-link href="{{ route('guide.index') }}" :active="request()->routeIs('guide.*')">
+                <x-slot name="icon">
+                    <i class="fa-solid fa-compass text-lg w-6 text-center"></i>
+                </x-slot>
+                {{ __('Panduan Uji Coba') }}
+            </x-nav-link>
         </div>
 
         @if (auth()->user()->role === 'admin')
@@ -63,6 +70,20 @@
                     {{ __('Pembayaran Angsuran') }}
                 </x-nav-link>
 
+                <x-nav-link href="{{ route('periods.index') }}" :active="request()->routeIs('periods.*')">
+                    <x-slot name="icon">
+                        <i class="fa-solid fa-calendar-xmark text-lg w-6 text-center"></i>
+                    </x-slot>
+                    {{ __('Tutup Buku & Periode') }}
+                </x-nav-link>
+
+                <x-nav-link href="{{ route('shu.index') }}" :active="request()->routeIs('shu.*')">
+                    <x-slot name="icon">
+                        <i class="fa-solid fa-scale-balanced text-lg w-6 text-center"></i>
+                    </x-slot>
+                    {{ __('Pembagian SHU') }}
+                </x-nav-link>
+
                 <x-nav-link href="{{ route('managements.index') }}" :active="request()->routeIs('managements.*')">
                     <x-slot name="icon">
                         <i class="fa-solid fa-user-tie text-lg w-6 text-center"></i>
@@ -94,6 +115,13 @@
                         <i class="fa-solid fa-users-gear text-lg w-6 text-center"></i>
                     </x-slot>
                     {{ __('Admin / Pengguna') }}
+                </x-nav-link>
+
+                <x-nav-link href="{{ route('settings.index') }}" :active="request()->routeIs('settings.*')">
+                    <x-slot name="icon">
+                        <i class="fa-solid fa-sliders text-lg w-6 text-center"></i>
+                    </x-slot>
+                    {{ __('Kebijakan & Pengaturan') }}
                 </x-nav-link>
             </div>
         @endif

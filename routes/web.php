@@ -6,10 +6,13 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\ManagementController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\PeriodController;
 use App\Http\Controllers\PinjamanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SavingController;
+use App\Http\Controllers\SettingController;
+use App\Http\Controllers\ShuController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ValidationController;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +32,7 @@ Route::middleware('auth')->group(function () {
 
     // Rute Profil & Umum (Bisa diakses Admin & Pimpinan)
     Route::view('about', 'about')->name('about');
+    Route::view('/panduan-uji-coba', 'guide.index')->name('guide.index');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -72,6 +76,21 @@ Route::middleware('auth')->group(function () {
 
         // Modul Pengurus
         Route::resource('managements', ManagementController::class);
+
+        // Modul Tutup Buku / Closure Periode & Kebijakan Finansial
+        Route::get('/periods', [PeriodController::class, 'index'])->name('periods.index');
+        Route::post('/periods', [PeriodController::class, 'store'])->name('periods.store');
+        Route::delete('/periods/{closure}', [PeriodController::class, 'destroy'])->name('periods.destroy');
+
+        Route::get('/settings/keuangan', [SettingController::class, 'index'])->name('settings.index');
+        Route::post('/settings/keuangan', [SettingController::class, 'update'])->name('settings.update');
+
+        // Modul Pembagian SHU
+        Route::get('/shu', [ShuController::class, 'index'])->name('shu.index');
+        Route::get('/shu/kalkulasi', [ShuController::class, 'create'])->name('shu.create');
+        Route::post('/shu', [ShuController::class, 'store'])->name('shu.store');
+        Route::get('/shu/{distribution}', [ShuController::class, 'show'])->name('shu.show');
+        Route::get('/shu/{distribution}/pdf', [ShuController::class, 'exportPdf'])->name('shu.pdf');
 
         Route::get('/validasi/{token}', [ValidationController::class, 'check'])->name('validasi.dokumen');
 

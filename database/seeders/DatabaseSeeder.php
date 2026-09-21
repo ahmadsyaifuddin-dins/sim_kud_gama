@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             PinjamanSeeder::class,
             AngsuranSeeder::class,
             SavingSeeder::class,
+            SettingSeeder::class,
         ]);
     }
 }

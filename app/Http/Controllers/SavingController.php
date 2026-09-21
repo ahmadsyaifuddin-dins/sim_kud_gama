@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SavingRequest;
 use App\Models\Member;
 use App\Models\Saving;
+use App\Services\PeriodClosureService;
 
 class SavingController extends Controller
 {
@@ -29,6 +30,13 @@ class SavingController extends Controller
     public function store(SavingRequest $request)
     {
         $data = $request->validated();
+
+        // Kunci periode: cegah input transaksi pada periode yang sudah ditutup
+        if (PeriodClosureService::isLocked($data['tanggal_bayar'])) {
+            $errors = PeriodClosureService::lockErrorMessage('tanggal_bayar', $data['tanggal_bayar']);
+
+            return back()->withErrors($errors);
+        }
 
         // 1. Upload Bukti Transfer (Old School Way)
         if ($request->hasFile('bukti_transfer')) {
@@ -61,6 +69,13 @@ class SavingController extends Controller
     {
         $data = $request->validated();
 
+        // Kunci periode: cegah perubahan transaksi pada periode yang sudah ditutup
+        if (PeriodClosureService::isLocked($data['tanggal_bayar'])) {
+            $errors = PeriodClosureService::lockErrorMessage('tanggal_bayar', $data['tanggal_bayar']);
+
+            return back()->withErrors($errors);
+        }
+
         if ($request->hasFile('bukti_transfer')) {
             // Hapus file lama jika ada (Old School Way)
             if ($saving->bukti_transfer && file_exists(public_path($saving->bukti_transfer))) {
@@ -82,6 +97,13 @@ class SavingController extends Controller
 
     public function destroy(Saving $saving)
     {
+        // Kunci periode: cegah penghapusan transaksi pada periode yang sudah ditutup
+        if (PeriodClosureService::isLocked($saving->tanggal_bayar)) {
+            $errors = PeriodClosureService::lockErrorMessage('tanggal_bayar', $saving->tanggal_bayar);
+
+            return back()->withErrors($errors);
+        }
+
         // Hapus file dari folder public sebelum data dihapus dari DB
         if ($saving->bukti_transfer && file_exists(public_path($saving->bukti_transfer))) {
             unlink(public_path($saving->bukti_transfer));

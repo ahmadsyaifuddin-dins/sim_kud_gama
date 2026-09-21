@@ -17,6 +17,39 @@
     </div>
 </div>
 
+<div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
+    <div class="flex items-start gap-3">
+        <div
+            class="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+            <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div class="flex-1">
+            <p class="text-sm font-bold text-emerald-800">Batas Maksimal Plafond Pinjaman</p>
+            <p class="text-xs text-emerald-700 leading-relaxed mt-0.5">
+                Nominal pinjaman dibatasi berdasarkan nilai terbesar antara
+                <strong>luas lahan sawit (Ha × plafond per hektar)</strong> atau
+                <strong>akumulasi saldo Simpanan Pokok + Wajib (× pengali)</strong>.
+                Pilih anggota di bawah untuk melihat plafondnya.
+            </p>
+            <div class="mt-2 text-sm" id="plafond-preview">
+                <span class="text-emerald-800 font-semibold">Plafond anggota: </span>
+                @if (isset($pinjaman) && $pinjaman->member)
+                    <span class="font-bold" id="plafond-nominal">
+                        Rp {{ number_format($membersPlafond[$pinjaman->member_id]['plafond'] ?? 0, 0, ',', '.') }}
+                    </span>
+                    <span class="text-xs text-emerald-600 ml-2" id="plafond-detail">
+                        (Lahan: {{ number_format($membersPlafond[$pinjaman->member_id]['luasan_lahan'] ?? 0, 2, ',', '.') }}
+                        Ha • Simpanan P+W: Rp {{ number_format($membersPlafond[$pinjaman->member_id]['saldo_pokok_wajib'] ?? 0, 0, ',', '.') }})
+                    </span>
+                @else
+                    <span class="font-bold" id="plafond-nominal">-- pilih anggota --</span>
+                    <span class="text-xs text-emerald-600 ml-2" id="plafond-detail"></span>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
 @csrf
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -24,10 +57,13 @@
     <div>
         <x-forms.label value="Anggota Peminjam" required="true" />
         <!-- Jika mode edit (ada data pinjaman), disable dropdown agar tidak bisa diubah -->
-        <x-forms.dropdown name="member_id" required :disabled="isset($pinjaman)">
+        <x-forms.dropdown name="member_id" required id="member-dropdown" :disabled="isset($pinjaman)">
             <option value="">-- Pilih Anggota --</option>
             @foreach ($members as $member)
                 <option value="{{ $member->id }}"
+                    data-plafond="{{ $membersPlafond[$member->id]['plafond'] ?? 0 }}"
+                    data-saldo="{{ $membersPlafond[$member->id]['saldo_pokok_wajib'] ?? 0 }}"
+                    data-lahan="{{ $membersPlafond[$member->id]['luasan_lahan'] ?? 0 }}"
                     {{ old('member_id', $pinjaman->member_id ?? '') == $member->id ? 'selected' : '' }}>
                     {{ $member->nomor_anggota }} - {{ $member->nama_lengkap }}
                 </option>
@@ -44,7 +80,7 @@
     <div>
         <x-forms.label value="Tanggal Pengajuan" required="true" />
         <x-forms.input type="date" name="tanggal_pengajuan"
-            value="{{ old('tanggal_pengajuan', isset($pinjaman) ? $pinjaman->tanggal_pengajuan : date('Y-m-d')) }}"
+            value="{{ old('tanggal_pengajuan', isset($pinjaman) ? ($pinjaman->tanggal_pengajuan?->format('Y-m-d') ?? '') : date('Y-m-d')) }}"
             required />
     </div>
 
@@ -59,7 +95,44 @@
     <div>
         <x-forms.label value="Lama Angsuran (Bulan)" required="true" />
         <x-forms.input type="number" name="lama_angsuran"
-            value="{{ old('lama_angsuran', $pinjaman->lama_angsuran ?? '') }}" min="1" required />
+            value="{{ old('lama_angsuran', $pinjaman->lama_angsuran ?? '') }}" min="1" max="60" required />
+    </div>
+
+    <!-- Field Jenis Perhitungan Bunga -->
+    <div class="md:col-span-2">
+        <x-forms.label value="Jenis Perhitungan Bunga" required="true" />
+        <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label
+                class="flex items-start gap-3 border rounded-lg p-4 cursor-pointer transition {{ old('jenis_bunga', $pinjaman->jenis_bunga ?? 'flat') === 'flat' ? 'border-pink-500 bg-pink-50' : 'border-gray-200 hover:border-pink-300' }}">
+                <input type="radio" name="jenis_bunga" value="flat"
+                    class="text-pink-600 focus:ring-pink-500 h-5 w-5 mt-0.5 cursor-pointer"
+                    {{ old('jenis_bunga', $pinjaman->jenis_bunga ?? 'flat') === 'flat' ? 'checked' : '' }} required>
+                <div>
+                    <p class="text-sm font-bold text-gray-700">Bunga Flat / Tetap</p>
+                    <p class="text-xs text-gray-500 leading-relaxed">Pokok & jasa dihitung rata setiap bulan. Cicilan
+                        tiap angsuran sama besar selama tenor.</p>
+                </div>
+            </label>
+            <label
+                class="flex items-start gap-3 border rounded-lg p-4 cursor-pointer transition {{ old('jenis_bunga', $pinjaman->jenis_bunga ?? '') === 'menurun' ? 'border-pink-500 bg-pink-50' : 'border-gray-200 hover:border-pink-300' }}">
+                <input type="radio" name="jenis_bunga" value="menurun"
+                    class="text-pink-600 focus:ring-pink-500 h-5 w-5 mt-0.5 cursor-pointer"
+                    {{ old('jenis_bunga', $pinjaman->jenis_bunga ?? '') === 'menurun' ? 'checked' : '' }} required>
+                <div>
+                    <p class="text-sm font-bold text-gray-700">Bunga Menurun (Anuitas)</p>
+                    <p class="text-xs text-gray-500 leading-relaxed">Jasa dihitung dari sisa pokok yang belum lunas.
+                        Porsi bunga menurun seiring berjalannya angsuran.</p>
+                </div>
+            </label>
+        </div>
+    </div>
+
+    <!-- Field Persentase Jasa per Bulan -->
+    <div>
+        <x-forms.label value="Persentase Jasa per Bulan (%)" required="true" />
+        <x-forms.input type="number" step="0.01" min="0" max="12" name="persentase_bunga"
+            value="{{ old('persentase_bunga', $pinjaman->persentase_bunga ?? 1.5) }}" required
+            placeholder="Contoh: 1.5" />
     </div>
 
     <!-- Field Keperluan Pinjaman -->
@@ -90,3 +163,33 @@
     @endif
 
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdown = document.getElementById('member-dropdown');
+        if (!dropdown) {
+            return;
+        }
+
+        const plafondNominal = document.getElementById('plafond-nominal');
+        const plafondDetail = document.getElementById('plafond-detail');
+
+        const formatRp = (value) => 'Rp ' + parseInt(value || 0).toLocaleString('id-ID');
+
+        dropdown.addEventListener('change', function() {
+            const option = dropdown.options[dropdown.selectedIndex];
+            if (!option || !option.value) {
+                plafondNominal.textContent = '-- pilih anggota --';
+                plafondDetail.textContent = '';
+                return;
+            }
+
+            const lahan = parseFloat(option.dataset.lahan || 0);
+            const saldo = parseInt(option.dataset.saldo || 0);
+
+            plafondNominal.textContent = formatRp(option.dataset.plafond);
+            plafondDetail.textContent = '(Lahan: ' + lahan.toLocaleString('id-ID') + ' Ha \u2022 Simpanan P+W: ' +
+                formatRp(saldo) + ')';
+        });
+    });
+</script>

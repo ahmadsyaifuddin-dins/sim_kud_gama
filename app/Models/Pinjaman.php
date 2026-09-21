@@ -10,7 +10,15 @@ class Pinjaman extends Model
 
     protected $fillable = [
         'member_id', 'tanggal_pengajuan', 'jumlah_pinjaman', 'lama_angsuran',
+        'jenis_bunga', 'persentase_bunga',
         'keperluan', 'status', 'tanggal_pencairan', 'user_id',
+    ];
+
+    protected $casts = [
+        'jumlah_pinjaman' => 'decimal:2',
+        'persentase_bunga' => 'decimal:2',
+        'tanggal_pengajuan' => 'date',
+        'tanggal_pencairan' => 'date',
     ];
 
     public function member()

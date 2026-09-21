@@ -25,7 +25,9 @@
                         <th class="p-4 font-bold">Anggota (Pinjaman)</th>
                         <th class="p-4 font-bold text-center">Angsuran Ke</th>
                         <th class="p-4 font-bold">Tanggal Bayar</th>
+                        <th class="p-4 font-bold">Jatuh Tempo</th>
                         <th class="p-4 font-bold text-right">Jumlah (Rp)</th>
+                        <th class="p-4 font-bold text-right">Denda</th>
                         <th class="p-4 font-bold text-center">Bukti</th>
                         <th class="p-4 font-bold text-center w-28">Aksi</th>
                     </tr>
@@ -51,8 +53,31 @@
                                 <i class="fa-regular fa-calendar-days text-slate-400 mr-1"></i>
                                 {{ \Carbon\Carbon::parse($item->tanggal_bayar)->translatedFormat('d M Y') }}
                             </td>
+                            <td class="p-4 text-slate-500 font-medium">
+                                @if ($item->tanggal_jatuh_tempo)
+                                    {{ \Carbon\Carbon::parse($item->tanggal_jatuh_tempo)->translatedFormat('d M Y') }}
+                                @else
+                                    <span class="text-slate-400">-</span>
+                                @endif
+                            </td>
                             <td class="p-4 text-right font-bold text-slate-800">
                                 {{ number_format($item->jumlah_bayar, 0, ',', '.') }}
+                                @if ($item->jumlah_pokok !== null)
+                                    <span class="block text-[10px] font-medium text-slate-400">
+                                        (Pokok {{ number_format($item->jumlah_pokok, 0, ',', '.') }} + Bunga
+                                        {{ number_format($item->jumlah_bunga, 0, ',', '.') }})
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="p-4 text-right">
+                                @if ((float) $item->jumlah_denda > 0)
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 text-xs font-bold bg-red-100 text-red-700 rounded-full">
+                                        {{ number_format($item->jumlah_denda, 0, ',', '.') }}
+                                    </span>
+                                @else
+                                    <span class="text-slate-400">-</span>
+                                @endif
                             </td>
                             <td class="p-4 text-center">
                                 @if ($item->bukti_bayar)
@@ -77,14 +102,16 @@
                                     </a>
 
                                     <form action="{{ route('angsuran.destroy', $item->id) }}" method="POST"
-                                        class="inline-block confirm-action" data-swal-title="Hapus Data Angsuran?"
-                                        data-swal-text="Yakin ingin menghapus angsuran ke-{{ $item->angsuran_ke }} dari {{ $item->pinjaman->member->nama_lengkap }}?">
+                                        class="inline-block confirm-action"
+                                        data-swal-title="Hapus Data Angsuran?"
+                                        data-swal-text="Yakin ingin menghapus angsuran ke-{{ $item->angsuran_ke }} dari {{ $item->pinjaman->member->nama_lengkap }}? Status pinjaman akan menyesuaikan otomatis."
+                                        data-swal-icon="warning" data-swal-confirm="Ya, Hapus!" data-swal-color="#dc2626">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
-                                            class="w-8 h-8 flex items-center justify-center text-red-600 bg-red-50 rounded-md hover:bg-red-600 hover:text-white transition shadow-sm"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 rounded-md hover:bg-red-600 hover:text-white transition shadow-sm"
                                             title="Hapus Data">
-                                            <i class="fa-solid fa-trash-can"></i>
+                                            <i class="fa-solid fa-trash-can"></i> Hapus
                                         </button>
                                     </form>
                                 </div>
@@ -92,7 +119,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="p-12 text-center">
+                            <td colspan="9" class="p-12 text-center">
                                 <div class="flex flex-col items-center justify-center text-slate-400">
                                     <i class="fa-solid fa-folder-open text-5xl mb-3 text-slate-300"></i>
                                     <p class="text-slate-500 font-medium">Belum ada data pembayaran angsuran.</p>

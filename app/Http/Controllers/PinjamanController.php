@@ -8,6 +8,8 @@ use App\Http\Requests\UpdatePinjamanRequest;
 use App\Http\Requests\UpdateStatusPinjamanRequest;
 use App\Models\Member;
 use App\Models\Pinjaman;
+use App\Services\LoanCalculator;
+use App\Services\PeriodClosureService;
 use App\Services\WhatsAppService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Artisan;
@@ -27,6 +29,14 @@ class PinjamanController extends Controller
     public function store(StorePinjamanRequest $request)
     {
         $validated = $request->validated();
+
+        // Kunci periode: cegah pengajuan pada periode yang sudah ditutup
+        if (PeriodClosureService::isLocked($validated['tanggal_pengajuan'])) {
+            $errors = PeriodClosureService::lockErrorMessage('tanggal_pengajuan', $validated['tanggal_pengajuan']);
+
+            return back()->withErrors($errors);
+        }
+
         $validated['user_id'] = Auth::id(); // Mencatat admin yang menginput
 
         Pinjaman::create($validated);
@@ -37,21 +47,53 @@ class PinjamanController extends Controller
     public function create()
     {
         // Ambil data anggota yang aktif saja untuk dipilih di dropdown
-        $members = Member::where('status', 'active')->get();
+        $members = Member::with('savings')->where('status', 'active')->get();
 
-        return view('pinjaman.create', compact('members'));
+        // Informasi plafond setiap anggota untuk pratinjau di form
+        $membersPlafond = $members->mapWithKeys(function ($member) {
+            return [
+                $member->id => [
+                    'plafond' => LoanCalculator::plafond($member),
+                    'saldo_pokok_wajib' => LoanCalculator::saldoPokokWajib($member),
+                    'luasan_lahan' => (float) ($member->luasan_lahan ?? 0),
+                ],
+            ];
+        });
+
+        return view('pinjaman.create', compact('members', 'membersPlafond'));
     }
 
     public function edit(Pinjaman $pinjaman)
     {
-        $members = Member::where('status', 'active')->get();
+        $members = Member::with('savings')->where('status', 'active')->get();
 
-        return view('pinjaman.edit', compact('pinjaman', 'members'));
+        $membersPlafond = $members->mapWithKeys(function ($member) {
+            return [
+                $member->id => [
+                    'plafond' => LoanCalculator::plafond($member),
+                    'saldo_pokok_wajib' => LoanCalculator::saldoPokokWajib($member),
+                    'luasan_lahan' => (float) ($member->luasan_lahan ?? 0),
+                ],
+            ];
+        });
+
+        return view('pinjaman.edit', compact('pinjaman', 'members', 'membersPlafond'));
     }
 
     public function update(UpdatePinjamanRequest $request, Pinjaman $pinjaman)
     {
         $validated = $request->validated();
+
+        // Kunci periode: cegah perubahan jika tanggal baru / lama berada di periode tertutup
+        if (PeriodClosureService::isLocked($validated['tanggal_pengajuan']) || PeriodClosureService::isLocked($pinjaman->tanggal_pengajuan)) {
+            $tanggalTerkunci = PeriodClosureService::isLocked($validated['tanggal_pengajuan'])
+                ? $validated['tanggal_pengajuan']
+                : $pinjaman->tanggal_pengajuan;
+            $errors = PeriodClosureService::lockErrorMessage('tanggal_pengajuan', $tanggalTerkunci);
+
+            return back()->withErrors($errors);
+        }
+
         $pinjaman->update($validated);
 
         return redirect()->route('pinjaman.index')->with('success', 'Data pengajuan pinjaman berhasil diperbarui!');
@@ -59,6 +101,13 @@ class PinjamanController extends Controller
 
     public function destroy(Pinjaman $pinjaman)
     {
+        // Kunci periode: cegah penghapusan data periode yang sudah ditutup
+        if (PeriodClosureService::isLocked($pinjaman->tanggal_pengajuan)) {
+            $errors = PeriodClosureService::lockErrorMessage('tanggal_pengajuan', $pinjaman->tanggal_pengajuan);
+
+            return back()->withErrors($errors);
+        }
+
         $pinjaman->delete();
 
         return redirect()->route('pinjaman.index')->with('success', 'Data pinjaman berhasil dihapus!');
@@ -91,7 +140,7 @@ class PinjamanController extends Controller
     {
         // Kalkulasi format uang
         $jumlah = 'Rp '.number_format($pinjaman->jumlah_pinjaman, 0, ',', '.');
-        $cicilan_per_bulan = 'Rp '.number_format($pinjaman->jumlah_pinjaman / $pinjaman->lama_angsuran, 0, ',', '.');
+        $cicilan_per_bulan = 'Rp '.number_format(LoanCalculator::angsuranPerBulan($pinjaman), 0, ',', '.');
         $tenor = $pinjaman->lama_angsuran;
 
         if ($pinjaman->status === 'disetujui') {
@@ -102,6 +151,7 @@ class PinjamanController extends Controller
             *Detail Pinjaman:*
             • Nominal Pinjaman: {$jumlah}
             • Tenor: {$tenor} Bulan
+            • Bunga: *".($pinjaman->persentase_bunga ?? 0)."%/bulan* (".strtoupper($pinjaman->jenis_bunga ?? 'flat').")
             • Angsuran per Bulan: {$cicilan_per_bulan}
             
             Dana sudah dapat dicairkan. Silakan datang ke kantor KUD Gajah Mada dengan membawa Kartu Identitas (KTP/Kartu Anggota) pada jam kerja.

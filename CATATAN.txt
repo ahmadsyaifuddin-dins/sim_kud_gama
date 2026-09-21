@@ -1,0 +1,50 @@
+1. install kan package laravel lang otomatis jadi semua error termasuk error auth.failed yg ada di login itu menjadi bahasa indonesia (jadi semua otomatis nanti dihandle oleh package laravel itu)
+
+
+
+4. buat perkeren (agak futuristik karna dikit ya sebagai revisi aplikasi jadi sedikit ada peningkatan di ui sidebar nya ini) dong tampilan di ui navigation bladenya terutama pada bagian 
+<div class="flex items-center justify-center mt-8 mb-6">
+        <div class="flex flex-col items-center gap-2">
+            <div class="bg-white p-1 rounded-full shadow-lg">
+                <img src="{{ asset('logo/kud-logo.jpg') }}" alt="Logo KUD" class="h-16 w-16 rounded-full object-cover">
+            </div>
+            <span class="text-white text-xl font-bold tracking-wide mt-2">
+                KUD GAMA
+            </span>
+        </div>
+    </div>
+
+
+
+
+6. pastikan tulisan tulisan seperti &rarr; terus &times; dan sejenisnya itu pastikan diperbaiki ya agar gak membuat kebingungan dan keanehan
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5. ada masalah pada form pinjamanp ada inputan tanggal pinjaman itu ketika aku save udah lalu mau edit datanya eh kok gak autofill ya padahal di udah masuk ke db kok? DONEE FIX
+
+
+
+2. tambahkan pengertian maksud seperti SHU itu apa Plafond, bunga default, dan denda keterlambatan itu apa yang di halaman Kebijakan Pinjaman & Pembagian SHU agar admin aplikasi tidak bingung, buat catatan dengan icon yg menarik bisa di tutup buka (accordion) buat penjelasan yg mudah di pahami juga DONEE
+
+
+
+3. oke, aku mau uji coba hasil revisi mu ini mulai darimana dulu nih, terus nanti tambahkan menu (halaman baru dengan ui yg menarik ya) semacam rangkaian mulai darimana aja nih fitur fitur yg telah di revisi tadi dan kasih tau user mulai dari mana dulu nih uji coba nya jadi aku gak begitu banyak nanti ngejelasin ke aya (aplikasi dia) DONEE
+
+
+7. pada index pinjaman itu kan ada confirm setujui pinjaman dan tolak pinjaman masih menggunakan confirm bawaan kan ya nah itu ubah ke sweetalert2 yg sudah di atur (aku lupa kode yg handle modularnya nah pakai itu ya) hati hati ngebug DONEE

@@ -10,7 +10,9 @@
             <h4 class="text-lg font-semibold text-gray-700">Daftar Pinjaman Anggota</h4>
             <div class="flex gap-2">
                 <form action="{{ route('pinjaman.remind-all') }}" method="POST"
-                    onsubmit="return confirm('Jalankan pengecekan massal? Sistem akan mengirim WA ke SEMUA anggota yang jatuh temponya besok.')">
+                    class="confirm-action" data-swal-title="Cek & Tagih Massal?"
+                    data-swal-text="Sistem akan memeriksa semua pinjaman dan mengirim WA ke anggota yang jatuh temponya besok atau yang terlambat."
+                    data-swal-icon="question" data-swal-confirm="Ya, Cek & Tagih!" data-swal-color="#2563eb">
                     @csrf
                     <button type="submit"
                         class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition flex items-center gap-2">
@@ -36,6 +38,8 @@
                         <th class="p-3 font-semibold text-gray-700">Tanggal</th>
                         <th class="p-3 font-semibold text-gray-700 text-right">Jumlah (Rp)</th>
                         <th class="p-3 font-semibold text-gray-700 text-center">Tenor</th>
+                        <th class="p-3 font-semibold text-gray-700 text-center">Bunga</th>
+                        <th class="p-3 font-semibold text-gray-700 text-right">Angsuran/Bln</th>
                         <th class="p-3 font-semibold text-gray-700 text-center">Status</th>
                         <th class="p-3 font-semibold text-gray-700 text-center">Aksi</th>
                     </tr>
@@ -55,6 +59,22 @@
                                 {{ number_format($item->jumlah_pinjaman, 0, ',', '.') }}
                             </td>
                             <td class="p-3 text-center">{{ $item->lama_angsuran }} Bln</td>
+                            <td class="p-3 text-center">
+                                @if ($item->jenis_bunga)
+                                    <span
+                                        class="px-2 py-1 bg-purple-100 text-purple-800 text-xs font-semibold rounded-full">{{ $item->jenis_bunga === 'flat' ? 'Flat' : 'Menurun' }}
+                                        • {{ rtrim(rtrim(number_format($item->persentase_bunga, 2, '.', ''), '0'), '.') }}%</span>
+                                @else
+                                    <span class="text-gray-400 text-xs">-</span>
+                                @endif
+                            </td>
+                            <td class="p-3 text-right font-medium text-gray-700">
+                                @if ($item->jenis_bunga)
+                                    {{ number_format(\App\Services\LoanCalculator::angsuranPerBulan($item), 0, ',', '.') }}
+                                @else
+                                    <span class="text-gray-400">{{ number_format($item->jumlah_pinjaman / $item->lama_angsuran, 0, ',', '.') }}</span>
+                                @endif
+                            </td>
                             <td class="p-3 text-center">
                                 @if ($item->status == 'menunggu')
                                     <span
@@ -103,8 +123,10 @@
 
                                 @if ($showReminder)
                                     <form action="{{ route('pinjaman.remind', $item->id) }}" method="POST"
-                                        class="inline-block"
-                                        onsubmit="return confirm('Kirim pengingat tagihan ke WhatsApp {{ $item->member->nama_lengkap }} sekarang?')">
+                                        class="inline-block confirm-action"
+                                        data-swal-title="Kirim Pengingat Tagihan?"
+                                        data-swal-text="Kirim pengingat tagihan ke WhatsApp {{ $item->member->nama_lengkap }} sekarang?"
+                                        data-swal-icon="info" data-swal-confirm="Ya, Kirim!" data-swal-color="#f97316">
                                         @csrf
                                         <button type="submit"
                                             class="text-orange-500 hover:text-orange-700 font-medium text-sm ml-2 relative group"
@@ -118,8 +140,10 @@
 
                                 @if ($item->status == 'menunggu')
                                     <form action="{{ route('pinjaman.update-status', $item->id) }}" method="POST"
-                                        class="inline-block"
-                                        onsubmit="return confirm('Setujui pinjaman ini dan kirim notifikasi WhatsApp?')">
+                                        class="inline-block confirm-action"
+                                        data-swal-title="Setujui Pinjaman?"
+                                        data-swal-text="Setujui pinjaman {{ $item->member->nama_lengkap }} dan kirim notifikasi WhatsApp?"
+                                        data-swal-icon="question" data-swal-confirm="Ya, Setujui!" data-swal-color="#16a34a">
                                         @csrf
                                         @method('PATCH')
                                         <input type="hidden" name="status" value="disetujui">
@@ -131,8 +155,10 @@
                                     </form>
 
                                     <form action="{{ route('pinjaman.update-status', $item->id) }}" method="POST"
-                                        class="inline-block"
-                                        onsubmit="return confirm('Tolak pinjaman ini dan kirim notifikasi WhatsApp?')">
+                                        class="inline-block confirm-action"
+                                        data-swal-title="Tolak Pinjaman?"
+                                        data-swal-text="Tolak pinjaman {{ $item->member->nama_lengkap }} dan kirim notifikasi WhatsApp?"
+                                        data-swal-icon="warning" data-swal-confirm="Ya, Tolak!" data-swal-color="#dc2626">
                                         @csrf
                                         @method('PATCH')
                                         <input type="hidden" name="status" value="ditolak">
@@ -147,7 +173,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="p-6 text-center text-gray-500">Belum ada data pengajuan pinjaman.
+                            <td colspan="9" class="p-6 text-center text-gray-500">Belum ada data pengajuan pinjaman.
                             </td>
                         </tr>
                     @endforelse
