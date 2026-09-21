@@ -4,13 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PublicRegisterRequest;
 use App\Models\Member;
+use App\Models\Pinjaman;
+use App\Models\Saving;
+use App\Models\ShuDistribution;
 use Illuminate\Http\Request;
 
 class LandingController extends Controller
 {
     public function index()
     {
-        return view('welcome');
+        return view('welcome', [
+            'totalAnggota' => Member::count(),
+            'totalSimpanan' => (float) Saving::sum('jumlah'),
+            'totalPinjaman' => Pinjaman::where('status', 'disetujui')->count(),
+            'totalShu' => (float) ShuDistribution::sum('total_shu'),
+        ]);
     }
 
     public function register()
