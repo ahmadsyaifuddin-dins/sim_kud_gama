@@ -26,6 +26,10 @@
             </div>
 
             <div class="w-full">
+                @include('dashboard._sumber_modal')
+            </div>
+
+            <div class="w-full">
                 @include('dashboard._status')
             </div>
         </div>

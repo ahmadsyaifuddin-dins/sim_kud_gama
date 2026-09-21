@@ -1,3 +1,22 @@
+<div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 mb-6 rounded shadow-sm" role="alert">
+    <div class="flex">
+        <div class="py-1">
+            <svg class="w-6 h-6 text-blue-500 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+        <div>
+            <p class="font-bold">Sumber Modal Penyaluran Pinjaman KUD Gajah Mada</p>
+            <p class="text-sm leading-relaxed mt-1">Dana pinjaman ini bersumber dari modal sendiri koperasi (simpanan
+                pokok, wajib, sukarela, serta dana cadangan/SHU ditahan) dan modal kemitraan pihak ketiga (perkebunan
+                kelapa sawit, sektor pertambangan, serta fasilitas likuiditas lembaga keuangan), berlandaskan Pasal 41
+                UU No. 25 Tahun 1992. Pengembalian angsuran anggota menjadi dana bergulir untuk membiayai pinjaman
+                berikutnya.</p>
+        </div>
+    </div>
+</div>
+
 @csrf
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
